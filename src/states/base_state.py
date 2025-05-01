@@ -1,6 +1,13 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.game.state_manager import StateManager
+
+
 class BaseState:
-    def __init__(self, manager):
-        self.manager = manager
+    def __init__(self, manager: 'StateManager'):
+        self.manager:'StateManager' = manager
+
 
     def handle_event(self, event):
         pass

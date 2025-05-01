@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     SCREEN_HEIGHT: int
     FPS: int
     MENU_BG_IMAGE: str
+    TITLE: str
 
 
 # Path to the settings file

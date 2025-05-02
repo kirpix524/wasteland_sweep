@@ -1,3 +1,4 @@
+import math
 from abc import ABC, abstractmethod
 from typing import Tuple, Optional, Any
 
@@ -71,15 +72,25 @@ class Projectile(Entity, ABC):
     def update(self, delta_time: float) -> None:
         """
         Двигать снаряд и проверять достижение максимальной дальности.
+        Скорость распределяется по осям пропорционально нормализованному вектору направления.
         """
         dx, dy = self._direction
-        move_x = dx * self._speed * delta_time
-        move_y = dy * self._speed * delta_time
+        # Нормализация направления
+        length = math.hypot(dx, dy)
+        if length == 0:
+            return
+        ndx, ndy = dx / length, dy / length
+
+        # Приращение позиции
+        move_dist = self._speed * delta_time
+        move_x = ndx * move_dist
+        move_y = ndy * move_dist
+
         x, y = self.position
         self.position = (x + move_x, y + move_y)
 
-        # Учитываем пройденное расстояние
-        self._distance_traveled += (abs(move_x) + abs(move_y))
+        # Учитываем пройденное расстояние по прямой
+        self._distance_traveled += move_dist
         if self._distance_traveled >= self._max_range:
             self.active = False
 

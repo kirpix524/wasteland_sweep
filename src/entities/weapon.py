@@ -29,6 +29,7 @@ class Weapon(Item):
         reload_time: float,
         shot_hearing_range: float,
         shot_vision_range: float,
+        magazine_capacity: int,
         picture: Optional[Any] = None,
         shape: Optional[Shape] = None
     ) -> None:
@@ -50,6 +51,11 @@ class Weapon(Item):
         self._reload_time: float         = reload_time
         self._shot_hearing_range: float  = shot_hearing_range
         self._shot_vision_range: float   = shot_vision_range
+
+        # Вместимость магазина и оставшиеся выстрелы
+        self._magazine_capacity: int = magazine_capacity
+        self._current_ammo: int = magazine_capacity
+        self._available_ammo: int = 0
 
         # Списки модификаторов
         self._firing_range_mods:       List[Modifier] = []
@@ -123,6 +129,12 @@ class Weapon(Item):
     def remove_shot_vision_range_modifier(self, mod: Modifier) -> None:
         self._shot_vision_range_mods.remove(mod)
 
+    def reload_magazine(self) -> None:
+        """Перезарядить магазин до полной вместимости."""
+        self._current_ammo = max(self._magazine_capacity, self._available_ammo)
+        self._available_ammo = 0
+
+
     def update(self, delta_time: float) -> None:
         """Обрабатывает таймер перезарядки."""
         if self._is_reloading:
@@ -131,11 +143,12 @@ class Weapon(Item):
                 self._is_reloading = False
                 self._reload_timer = 0.0
 
-    def start_reload(self) -> None:
+    def start_reload(self, available_ammo: int) -> None:
         """Начать перезарядку, если оружие не в процессе перезарядки."""
         if not self._is_reloading:
             self._is_reloading = True
             self._reload_timer = 0.0
+            self._available_ammo = available_ammo
 
     def can_fire(self) -> bool:
         """Проверяет, можно ли сделать выстрел (не в перезарядке)."""

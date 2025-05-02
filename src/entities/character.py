@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, List
 
 from src.entities.modifier import Modifier
+from src.game.animation import Animation
+
 
 class Character(Entity, ABC):
     """
@@ -27,6 +29,7 @@ class Character(Entity, ABC):
         collectable: bool = False,
         can_collect: bool = False,
         picture: Optional[Any] = None,
+        animation: Optional[Animation] = None,
         shape: Optional[Shape] = None
     ) -> None:
         super().__init__(entity_id, x, y, angle, collectable, picture, shape)
@@ -48,6 +51,7 @@ class Character(Entity, ABC):
         self._defense_modifiers:    List[Modifier] = []
         self._vision_modifiers:     List[Modifier] = []
         self._hearing_modifiers:    List[Modifier] = []
+        self._animation: Animation = animation
 
     @property
     def health(self) -> float:
@@ -80,6 +84,14 @@ class Character(Entity, ABC):
     @property
     def can_collect(self) -> bool:
         return self._can_collect
+
+    @property
+    def animation(self) -> Animation:
+        return self._animation
+
+    @animation.setter
+    def animation(self, animation: Animation) -> None:
+        self._animation = animation
 
     def take_damage(self, amount: float) -> None:
         """Уменьшает здоровье с учётом текущей защиты."""

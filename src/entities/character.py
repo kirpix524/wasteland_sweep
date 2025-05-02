@@ -41,6 +41,7 @@ class Character(Entity, ABC):
         hearing_range: float,
         angle: float = 0.0,
         collectable: bool = False,
+        can_collect: bool = False,
         picture: Optional[Any] = None,
         shape: Optional[Shape] = None
     ) -> None:
@@ -54,6 +55,7 @@ class Character(Entity, ABC):
         self._defense: float = defense
         self._vision_range: float = vision_range
         self._hearing_range: float = hearing_range
+        self._can_collect: bool = can_collect
 
         # списки модификаторов
         self._max_health_modifiers: List[Modifier] = []
@@ -91,6 +93,10 @@ class Character(Entity, ABC):
     def hearing_range(self) -> float:
         return self._hearing_range + sum(m.value for m in self._hearing_modifiers)
 
+    @property
+    def can_collect(self) -> bool:
+        return self._can_collect
+
     def take_damage(self, amount: float) -> None:
         """Уменьшает здоровье с учётом текущей защиты."""
         damage = max(0.0, amount - self.defense)
@@ -103,8 +109,11 @@ class Character(Entity, ABC):
     # методы для управления модификаторами
     def add_max_health_modifier(self, mod: Modifier) -> None:
         self._max_health_modifiers.append(mod)
+        self._health = min(self.max_health, self._health)
+
     def remove_max_health_modifier(self, mod: Modifier) -> None:
         self._max_health_modifiers.remove(mod)
+        self._health = min(self.max_health, self._health)
 
     def add_speed_modifier(self, mod: Modifier) -> None:
         self._speed_modifiers.append(mod)

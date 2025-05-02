@@ -1,8 +1,12 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Callable
+
+import pygame
+
 from modifier import Modifier
 from character import Character
 from item import Item
 from src.entities.entity import Shape
+from src.entities.projectile import Projectile
 from src.game.animation import Animation
 from weapon import Weapon
 
@@ -40,6 +44,16 @@ class Player(Character):
         # Экипированное оружие и броня
         self._equipped_weapon: Optional[Weapon] = None
         self._equipped_armor:  Optional[Item]   = None
+        self.on_shoot: List[Callable[[Projectile], None]] = []
+
+    @property
+    def velocity(self) -> pygame.Vector2:
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value: pygame.Vector2) -> None:
+        self._velocity = value
+
 
     @property
     def inventory(self) -> List[Item]:
@@ -109,15 +123,40 @@ class Player(Character):
         # Добавить модификатор защиты от брони
         self.add_defense_modifier(Modifier(defense_bonus, armor))
 
+    def fire_bullet(self, target: pygame.Vector2) -> None:
+        if self._equipped_weapon is not None:
+            if self._equipped_weapon.can_fire():
+                bullet = self._equipped_weapon.fire(target)
+                for callback in self.on_shoot:
+                    callback(bullet)
+
+    def reload_weapon(self) -> None:
+        if self._equipped_weapon is not None:
+            self._equipped_weapon.start_reload(None)
+
     def update(self, delta_time: float) -> None:
         """
         Обновление логики игрока:
-        – ввод/движение
+        – движение (позиция обновляется в Base/Character.update на основе velocity)
         – проверка столкновений
-        – обновление эффектов
+        – обновление статус-эффектов
         """
         super().update(delta_time)
-        # TODO: реализовать логику управления игроком
+
+        # 1) Проверка и разрешение столкновений
+        self._check_collisions()
+
+
+    def _check_collisions(self) -> None:
+        """
+        Находит все объекты, с которыми столкнулся игрок, и разрешает столкновение.
+        """
+        # Пример: вызываем метод физического движка или world-сцену
+        # collisions = self._game_world.get_collisions(self)
+        # for obj in collisions:
+        #     self._resolve_collision(obj)
+        pass
+
 
     def render(self, surface: Any) -> None:
         """
@@ -125,3 +164,74 @@ class Player(Character):
         """
         super().render(surface)
         # TODO: отрисовать HUD и прицел
+
+
+
+
+class PlayerController:
+    def __init__(self, player: 'Player') -> None:
+        self._player: 'Player' = player
+        self._move_x: int = 0
+        self._move_y: int = 0
+
+    @property
+    def player(self) -> 'Player':
+        return self._player
+
+    def _update_velocity(self) -> None:
+        """
+        Обновляет скорость игрока по направлению (_move_x, _move_y), нормализуя вектор.
+        """
+        dx: int = self._move_x
+        dy: int = self._move_y
+        if dx == 0 and dy == 0:
+            self._player.velocity.x = 0
+            self._player.velocity.y = 0
+        else:
+            magnitude: float = (dx * dx + dy * dy) ** 0.5
+            self._player.velocity.x = dx / magnitude * self._player.speed
+            self._player.velocity.y = dy / magnitude * self._player.speed
+
+    def start_move_left(self) -> None:
+        self._move_x = -1
+        self._update_velocity()
+
+    def start_move_right(self) -> None:
+        self._move_x = 1
+        self._update_velocity()
+
+    def stop_move_horizontal(self) -> None:
+        self._move_x = 0
+        self._update_velocity()
+
+    def start_move_up(self) -> None:
+        self._move_y = -1
+        self._update_velocity()
+
+    def start_move_down(self) -> None:
+        self._move_y = 1
+        self._update_velocity()
+
+    def stop_move_vertical(self) -> None:
+        self._move_y = 0
+        self._update_velocity()
+
+    def shoot(self, target: pygame.Vector2) -> None:
+        """
+        Стреляет по позиции мыши, если оружие экипировано.
+        """
+        self._player.fire_bullet(target)
+
+    def reload(self) -> None:
+        """
+        Перезарядка текущего оружия.
+        """
+        self._player.reload_weapon()
+
+    def update_aim(self, target: pygame.Vector2) -> None:
+        """
+        Обновляет угол поворота игрока в направлении курсора.
+        """
+        dx: float = target.x - self._player.x
+        dy: float = target.y - self._player.y
+        self._player.angle = pygame.Vector2(dx, dy).angle_to(pygame.Vector2(1, 0))

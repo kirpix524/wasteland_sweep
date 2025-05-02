@@ -1,3 +1,5 @@
+import pygame
+
 from entity import Entity, Shape
 
 from abc import ABC, abstractmethod
@@ -40,6 +42,7 @@ class Character(Entity, ABC):
         self._speed: float = speed
         self._attack: float = attack
         self._defense: float = defense
+        self._velocity: pygame.Vector2 = pygame.Vector2(0.0, 0.0)
         self._vision_range: float = vision_range
         self._hearing_range: float = hearing_range
         self._can_collect: bool = can_collect
@@ -136,10 +139,13 @@ class Character(Entity, ABC):
     def remove_hearing_modifier(self, mod: Modifier) -> None:
         self._hearing_modifiers.remove(mod)
 
-    @abstractmethod
     def update(self, delta_time: float) -> None:
-        ...
+        """
+        Обновляет позицию персонажа на основе вектора скорости.
+        """
+        new_x = self.position[0] + self._velocity.x * delta_time
+        new_y = self.position[1] + self._velocity.y * delta_time
+        self.position = (new_x, new_y)
 
-    @abstractmethod
     def render(self, surface: Any) -> None:
-        ...
+        pass

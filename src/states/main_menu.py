@@ -1,4 +1,6 @@
 import pygame
+
+from src.game.input_handler import MainMenuStateInputHandler
 from src.states.base_state import BaseState
 from src.game.state_manager import StateManager
 
@@ -15,20 +17,20 @@ class MainMenuState(BaseState):
         # Подгоняем размер под экран
         self.__background = pygame.transform.scale(bg.convert_alpha(), (SCREEN_WIDTH, SCREEN_HEIGHT))
 
+    def change_selected(self, delta):
+        self.__selected = (self.__selected + delta) % len(self.OPTIONS)
+
+    def get_selected(self):
+        choice = self.OPTIONS[self.__selected]
+        if choice == "New Game":
+            self.manager.change_state("play")  # или конкретный PlayState
+        elif choice == "Load Game":
+            self.manager.change_state("load")  # State для загрузки
+        else:
+            self.manager.quit = True
+
     def handle_event(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
-                self.__selected = (self.__selected + 1) % len(self.OPTIONS)
-            elif event.key == pygame.K_UP:
-                self.__selected = (self.__selected - 1) % len(self.OPTIONS)
-            elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
-                choice = self.OPTIONS[self.__selected]
-                if choice == "New Game":
-                    self.manager.change_state("play")    # или конкретный PlayState
-                elif choice == "Load Game":
-                    self.manager.change_state("load")    # State для загрузки
-                else:
-                    self.manager.quit = True
+        MainMenuStateInputHandler.handle(event, self)
 
     def update(self, dt):
         pass

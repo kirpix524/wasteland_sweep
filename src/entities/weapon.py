@@ -1,5 +1,7 @@
 from abc import abstractmethod
-from typing import Any, Optional, Tuple, List
+from typing import Any, Optional, List
+
+import pygame
 
 from src.entities.entity import Shape
 from src.entities.item import Item
@@ -129,11 +131,11 @@ class Weapon(Item):
     def remove_shot_vision_range_modifier(self, mod: Modifier) -> None:
         self._shot_vision_range_mods.remove(mod)
 
+
     def reload_magazine(self) -> None:
         """Перезарядить магазин до полной вместимости."""
         self._current_ammo = max(self._magazine_capacity, self._available_ammo)
         self._available_ammo = 0
-
 
     def update(self, delta_time: float) -> None:
         """Обрабатывает таймер перезарядки."""
@@ -143,19 +145,22 @@ class Weapon(Item):
                 self._is_reloading = False
                 self._reload_timer = 0.0
 
-    def start_reload(self, available_ammo: int) -> None:
+    def start_reload(self, available_ammo: Optional[int]) -> None:
         """Начать перезарядку, если оружие не в процессе перезарядки."""
         if not self._is_reloading:
             self._is_reloading = True
             self._reload_timer = 0.0
-            self._available_ammo = available_ammo
+            if available_ammo is not None:
+                self._available_ammo = available_ammo
+            else:
+                self._available_ammo = self._magazine_capacity
 
     def can_fire(self) -> bool:
         """Проверяет, можно ли сделать выстрел (не в перезарядке)."""
         return not self._is_reloading
 
     @abstractmethod
-    def fire(self, direction: Tuple[float, float]) -> Optional[Projectile]:
+    def fire(self, direction: pygame.Vector2) -> Optional[Projectile]:
         """
         Выполнить выстрел в заданном направлении.
         Должен вернуть объект Projectile или None, если выстрел невозможен.

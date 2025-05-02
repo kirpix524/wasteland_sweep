@@ -4,8 +4,6 @@ import sys
 import pygame
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE
 from game.state_manager import StateManager
-from src.game.input_handler import InputHandler
-from src.game.renderer import Renderer
 from states.state_registry import register_states
 
 def main():
@@ -16,9 +14,9 @@ def main():
     clock = pygame.time.Clock()
 
 
-    manager = StateManager()
-    register_states(manager)
-    manager.change_state("menu")
+    state_manager = StateManager()
+    register_states(state_manager)
+    state_manager.change_state("menu")
 
     # Main loop
     running = True
@@ -33,16 +31,16 @@ def main():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
                 pygame.display.toggle_fullscreen()
             else:
-                InputHandler.handle(event, manager.current_state)
+                state_manager.current_state.handle_event(event)
 
         # Update game logic
-        if manager.current_state:
-            manager.current_state.update(dt)
-            if manager.quit:
+        if state_manager.current_state:
+            state_manager.current_state.update(dt)
+            if state_manager.quit:
                 running = False
 
-            manager.current_state.update(dt)
-            Renderer.render(screen, manager.current_state)
+            state_manager.current_state.update(dt)
+            state_manager.current_state.render(screen)
 
         pygame.display.flip()
 

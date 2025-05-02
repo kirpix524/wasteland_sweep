@@ -17,6 +17,7 @@ class Level:
         music: Optional[str] = None
     ) -> None:
         # Идентификатор уровня (только для чтения)
+        self.player_controller = None
         self._id: str = level_id
         # Название уровня
         self._name: str = name
@@ -84,6 +85,7 @@ class Level:
     def load_from_file(cls, path: str) -> 'Level':
         """Загрузить уровень из JSON/YAML-файла."""
         # Реализация загрузчика (Parser + фабрики сущностей)
+        # player.on_shoot.append(self.add_entity)
         ...
 
     def save_to_file(self, path: str) -> None:

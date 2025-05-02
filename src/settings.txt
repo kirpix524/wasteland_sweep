@@ -2,6 +2,7 @@
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 MENU_BG_IMAGE = ../resources/images/main_menu_bg.png
+LEVEL_1_BG_IMAGE = ../resources/images/level_1_bg.png
 
 # Game settings
 FPS = 60

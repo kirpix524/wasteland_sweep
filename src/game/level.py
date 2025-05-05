@@ -1,8 +1,13 @@
 from typing import List, Tuple, Optional, Any
+
+import pygame
+
 from src.entities.entity import Entity
 from src.entities.player import PlayerController, Player
 from src.game.entity_factory import EntityFactory
 from src.game.entity_manager import EntityManager
+from src.settings import PLAYER_IMAGE
+from src.utils.level_file_manager import LevelFileManager
 
 
 class Level:
@@ -113,8 +118,16 @@ class Level:
         level_id="level_1"
         level_name="Test level"
         briefing_message="Убей всех врагов"
-        level = Level(level_id, level_name, [], briefing_message, entity_factory)
-        player = Player(0, 100, 100, 100, 100, 50, 10, 10, 300, 150,0)
+        level_bg_path = LevelFileManager.get_level_bg_path(1)
+        level_bg=pygame.image.load(level_bg_path).convert()
+        level = Level(level_id,
+                      level_name,
+                      [],
+                      briefing_message,
+                      entity_factory,
+                      background=level_bg)
+        player_image = pygame.image.load(PLAYER_IMAGE)
+        player = Player(0, 100, 100, 100, 100, 50, 10, 10, 300, 150,0, picture=player_image)
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)
         level._player_controller = player_controller

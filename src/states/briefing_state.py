@@ -1,12 +1,12 @@
 import pygame
 from typing import TYPE_CHECKING
 
-from src.game.level import Level
 from src.states.base_state import BaseState
 from src.settings import BRIEFING_BG_IMAGE, SCREEN_WIDTH, SCREEN_HEIGHT
 
 if TYPE_CHECKING:
     from src.game.state_manager import StateManager
+    from src.game.game_session import GameSession
 
 class BriefingState(BaseState):
     def __init__(self, manager: 'StateManager', message: str) -> None:
@@ -31,7 +31,7 @@ class BriefingState(BaseState):
             elif event.key == pygame.K_RETURN:
                 choice: str = self._options[self._selected_index]
                 if choice == "Продолжить":
-                    self.manager.change_state("play")
+                    self.manager.change_state("play", game_session=self.manager.game_session)
                 else:
                     self.manager.change_state("menu")
 

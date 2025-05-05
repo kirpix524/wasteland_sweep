@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     FPS: int
     MENU_BG_IMAGE: str
     BRIEFING_BG_IMAGE: str
+    PLAYER_IMAGE: str
     LEVEL_PATHS: List[str]
     TITLE: str
 

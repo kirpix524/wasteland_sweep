@@ -232,6 +232,6 @@ class PlayerController:
         """
         Обновляет угол поворота игрока в направлении курсора.
         """
-        dx: float = target.x - self._player.x
-        dy: float = target.y - self._player.y
+        dx: float = target.x - self._player.position[0]
+        dy: float = target.y - self._player.position[1]
         self._player.angle = pygame.Vector2(dx, dy).angle_to(pygame.Vector2(1, 0))

@@ -192,6 +192,10 @@ class Entity(ABC):
     def id(self) -> int:
         return self._id
 
+    @id.setter
+    def id(self, value: int) -> None:
+        self._id = value
+
     @property
     def position(self) -> Tuple[float, float]:
         return self._position

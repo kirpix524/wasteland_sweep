@@ -4,8 +4,10 @@ import sys
 import pygame
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE
 from game.state_manager import StateManager
+from src.game.entity_factory import EntityFactory
 from src.game.game_session import GameSession
 from states.state_registry import register_states
+from entities.register_entities import register_entities
 
 def main():
     # Initialize Pygame
@@ -14,7 +16,9 @@ def main():
     pygame.display.set_caption(TITLE)
     clock = pygame.time.Clock()
 
-    game_session = GameSession()
+    entity_factory = EntityFactory()
+    register_entities(entity_factory)
+    game_session = GameSession(entity_factory)
     state_manager = StateManager(game_session)
     register_states(state_manager)
     state_manager.change_state("menu")

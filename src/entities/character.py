@@ -1,10 +1,9 @@
 import pygame
 
-from entity import Entity, Shape
-
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List
 
+from src.entities.entity import Entity, Shape
 from src.entities.modifier import Modifier
 from src.game.animation import Animation
 

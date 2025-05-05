@@ -2,13 +2,13 @@ from typing import List, Optional, Any, Callable
 
 import pygame
 
-from modifier import Modifier
-from character import Character
-from item import Item
+from src.entities.modifier import Modifier
+from src.entities.character import Character
+from src.entities.item import Item
 from src.entities.entity import Shape
 from src.entities.projectile import Projectile
 from src.game.animation import Animation
-from weapon import Weapon
+from src.entities.weapon import Weapon
 
 class Player(Character):
     """

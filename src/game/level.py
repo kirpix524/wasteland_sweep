@@ -1,6 +1,8 @@
 from typing import List, Tuple, Optional, Any
 from src.entities.entity import Entity
-from src.entities.player import PlayerController
+from src.entities.player import PlayerController, Player
+from src.game.entity_factory import EntityFactory
+from src.game.entity_manager import EntityManager
 
 
 class Level:
@@ -16,6 +18,8 @@ class Level:
         name: str,
         entities: List[Entity],
         briefing_message: str,
+        entity_factory: EntityFactory,
+        player_controller: Optional[PlayerController] = None,
         background: Optional[Any] = None,
         music: Optional[str] = None
     ) -> None:
@@ -30,11 +34,16 @@ class Level:
         self._background: Optional[Any] = background
         # Фоновая музыка для уровня
         self._music: Optional[str] = music
-        self._player_controller: Optional[PlayerController] = None
+        self._entity_manager: EntityManager = EntityManager(entity_factory)
+        self._player_controller: Optional[PlayerController] = player_controller
 
     @property
     def briefing_message(self) -> str:
         return self._briefing_message
+
+    @property
+    def entity_manager(self) -> EntityManager:
+        return self._entity_manager
 
     @property
     def player_controller(self) -> PlayerController:
@@ -98,11 +107,19 @@ class Level:
             e.render(surface)
 
     @classmethod
-    def load_from_file(cls, path: str) -> 'Level':
+    def load_from_file(cls, path: str, entity_factory: EntityFactory) -> 'Level':
         """Загрузить уровень из JSON/YAML-файла."""
         # Реализация загрузчика (Parser + фабрики сущностей)
-        # player.on_shoot.append(self.add_entity)
-        ...
+        level_id="level_1"
+        level_name="Test level"
+        briefing_message="Убей всех врагов"
+        level = Level(level_id, level_name, [], briefing_message, entity_factory)
+        player = Player(0, 100, 100, 100, 100, 50, 10, 10, 300, 150,0)
+        level.entity_manager.add_existing_entity(player)
+        player_controller = PlayerController(player)
+        level._player_controller = player_controller
+        player.on_shoot.append(level.add_entity)
+        return level
 
     def save_to_file(self, path: str) -> None:
         """Сохранить текущее состояние уровня в файл."""

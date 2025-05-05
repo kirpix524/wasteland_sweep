@@ -1,5 +1,7 @@
 from typing import List, TYPE_CHECKING
 
+from src.game.entity_factory import EntityFactory
+
 if TYPE_CHECKING:
     from src.game.level import Level
 
@@ -25,12 +27,13 @@ class LevelManager:
     def level_count(self) -> int:
         return len(self._level_paths)
 
-    def load_level(self, level_number: int) -> 'Level':
+    def load_level(self, level_number: int, entity_factory: 'EntityFactory') -> 'Level':
+        from src.game.level import Level
         if level_number < 1 or level_number > len(self._level_paths):
             raise ValueError(f"Level number {level_number} out of range")
         self._current_index = level_number - 1
         path: str = self._level_paths[self._current_index]
-        self._current_level = Level.load_from_file(path)
+        self._current_level = Level.load_from_file(path, entity_factory)
         return self._current_level
 
     def has_next_level(self) -> bool:

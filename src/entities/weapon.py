@@ -1,12 +1,13 @@
 from abc import abstractmethod
-from typing import Any, Optional, List
+from typing import Any, Optional, List, TYPE_CHECKING
 
 import pygame
 
-from src.entities.entity import Shape
 from src.entities.item import Item
-from src.entities.modifier import Modifier
-from src.entities.projectile import Projectile
+if TYPE_CHECKING:
+    from src.entities.entity import Shape
+    from src.entities.modifier import Modifier
+    from src.entities.projectile import Projectile
 
 
 class Weapon(Item):
@@ -33,7 +34,7 @@ class Weapon(Item):
         shot_vision_range: float,
         magazine_capacity: int,
         picture: Optional[Any] = None,
-        shape: Optional[Shape] = None
+        shape: Optional['Shape'] = None
     ) -> None:
         super().__init__(
             entity_id=entity_id,
@@ -60,12 +61,12 @@ class Weapon(Item):
         self._available_ammo: int = 0
 
         # Списки модификаторов
-        self._firing_range_mods:       List[Modifier] = []
-        self._bullet_speed_mods:       List[Modifier] = []
-        self._attack_power_mods:       List[Modifier] = []
-        self._reload_time_mods:        List[Modifier] = []
-        self._shot_hearing_range_mods: List[Modifier] = []
-        self._shot_vision_range_mods:  List[Modifier] = []
+        self._firing_range_mods:       List['Modifier'] = []
+        self._bullet_speed_mods:       List['Modifier'] = []
+        self._attack_power_mods:       List['Modifier'] = []
+        self._reload_time_mods:        List['Modifier'] = []
+        self._shot_hearing_range_mods: List['Modifier'] = []
+        self._shot_vision_range_mods:  List['Modifier'] = []
 
         # Внутренние флаги
         self._is_reloading: bool = False
@@ -75,60 +76,60 @@ class Weapon(Item):
     def firing_range(self) -> float:
         return self._firing_range + sum(m.value for m in self._firing_range_mods)
 
-    def add_firing_range_modifier(self, mod: Modifier) -> None:
+    def add_firing_range_modifier(self, mod: 'Modifier') -> None:
         self._firing_range_mods.append(mod)
 
-    def remove_firing_range_modifier(self, mod: Modifier) -> None:
+    def remove_firing_range_modifier(self, mod: 'Modifier') -> None:
         self._firing_range_mods.remove(mod)
 
     @property
     def bullet_speed(self) -> float:
         return self._bullet_speed + sum(m.value for m in self._bullet_speed_mods)
 
-    def add_bullet_speed_modifier(self, mod: Modifier) -> None:
+    def add_bullet_speed_modifier(self, mod: 'Modifier') -> None:
         self._bullet_speed_mods.append(mod)
 
-    def remove_bullet_speed_modifier(self, mod: Modifier) -> None:
+    def remove_bullet_speed_modifier(self, mod: 'Modifier') -> None:
         self._bullet_speed_mods.remove(mod)
 
     @property
     def attack_power(self) -> float:
         return self._attack_power + sum(m.value for m in self._attack_power_mods)
 
-    def add_attack_power_modifier(self, mod: Modifier) -> None:
+    def add_attack_power_modifier(self, mod: 'Modifier') -> None:
         self._attack_power_mods.append(mod)
 
-    def remove_attack_power_modifier(self, mod: Modifier) -> None:
+    def remove_attack_power_modifier(self, mod: 'Modifier') -> None:
         self._attack_power_mods.remove(mod)
 
     @property
     def reload_time(self) -> float:
         return self._reload_time + sum(m.value for m in self._reload_time_mods)
 
-    def add_reload_time_modifier(self, mod: Modifier) -> None:
+    def add_reload_time_modifier(self, mod: 'Modifier') -> None:
         self._reload_time_mods.append(mod)
 
-    def remove_reload_time_modifier(self, mod: Modifier) -> None:
+    def remove_reload_time_modifier(self, mod: 'Modifier') -> None:
         self._reload_time_mods.remove(mod)
 
     @property
     def shot_hearing_range(self) -> float:
         return self._shot_hearing_range + sum(m.value for m in self._shot_hearing_range_mods)
 
-    def add_shot_hearing_range_modifier(self, mod: Modifier) -> None:
+    def add_shot_hearing_range_modifier(self, mod: 'Modifier') -> None:
         self._shot_hearing_range_mods.append(mod)
 
-    def remove_shot_hearing_range_modifier(self, mod: Modifier) -> None:
+    def remove_shot_hearing_range_modifier(self, mod: 'Modifier') -> None:
         self._shot_hearing_range_mods.remove(mod)
 
     @property
     def shot_vision_range(self) -> float:
         return self._shot_vision_range + sum(m.value for m in self._shot_vision_range_mods)
 
-    def add_shot_vision_range_modifier(self, mod: Modifier) -> None:
+    def add_shot_vision_range_modifier(self, mod: 'Modifier') -> None:
         self._shot_vision_range_mods.append(mod)
 
-    def remove_shot_vision_range_modifier(self, mod: Modifier) -> None:
+    def remove_shot_vision_range_modifier(self, mod: 'Modifier') -> None:
         self._shot_vision_range_mods.remove(mod)
 
 
@@ -160,7 +161,7 @@ class Weapon(Item):
         return not self._is_reloading
 
     @abstractmethod
-    def fire(self, direction: pygame.Vector2) -> Optional[Projectile]:
+    def fire(self, direction: pygame.Vector2) -> Optional['Projectile']:
         """
         Выполнить выстрел в заданном направлении.
         Должен вернуть объект Projectile или None, если выстрел невозможен.

@@ -2,7 +2,7 @@ import pygame
 
 from src.entities.player import PlayerController
 from src.states.base_state import BaseState
-from src.states.main_menu import MainMenuState
+from src.states.main_menu_state import MainMenuState
 
 
 class MainMenuStateInputHandler:

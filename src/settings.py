@@ -2,7 +2,8 @@
 
 import os
 import ast
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     # IDE увидят эти объявления, но они не будут выполняться в runtime
@@ -10,6 +11,8 @@ if TYPE_CHECKING:
     SCREEN_HEIGHT: int
     FPS: int
     MENU_BG_IMAGE: str
+    BRIEFING_BG_IMAGE: str
+    LEVEL_PATHS: List[str]
     TITLE: str
 
 

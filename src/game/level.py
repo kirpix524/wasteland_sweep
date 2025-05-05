@@ -1,5 +1,7 @@
 from typing import List, Tuple, Optional, Any
 from src.entities.entity import Entity
+from src.entities.player import PlayerController
+
 
 class Level:
     """
@@ -13,20 +15,34 @@ class Level:
         level_id: str,
         name: str,
         entities: List[Entity],
+        briefing_message: str,
         background: Optional[Any] = None,
         music: Optional[str] = None
     ) -> None:
         # Идентификатор уровня (только для чтения)
-        self.player_controller = None
         self._id: str = level_id
         # Название уровня
         self._name: str = name
+        self._briefing_message: str = briefing_message
         # Все сущности на уровне
         self._entities: List[Entity] = entities
         # Фоновые настройки: изображение, анимация
         self._background: Optional[Any] = background
         # Фоновая музыка для уровня
         self._music: Optional[str] = music
+        self._player_controller: Optional[PlayerController] = None
+
+    @property
+    def briefing_message(self) -> str:
+        return self._briefing_message
+
+    @property
+    def player_controller(self) -> PlayerController:
+        return self._player_controller
+
+    @player_controller.setter
+    def player_controller(self, player_controller: PlayerController) -> None:
+        self._player_controller = player_controller
 
     @property
     def id(self) -> str:

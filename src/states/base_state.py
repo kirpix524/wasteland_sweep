@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 
 class BaseState:
-    def __init__(self, manager: 'StateManager'):
+    def __init__(self, manager: 'StateManager', **kwargs):
         self.manager:'StateManager' = manager
 
 

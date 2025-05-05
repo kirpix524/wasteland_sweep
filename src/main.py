@@ -4,6 +4,7 @@ import sys
 import pygame
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE
 from game.state_manager import StateManager
+from src.game.game_session import GameSession
 from states.state_registry import register_states
 
 def main():
@@ -13,8 +14,8 @@ def main():
     pygame.display.set_caption(TITLE)
     clock = pygame.time.Clock()
 
-
-    state_manager = StateManager()
+    game_session = GameSession()
+    state_manager = StateManager(game_session)
     register_states(state_manager)
     state_manager.change_state("menu")
 
@@ -38,8 +39,6 @@ def main():
             state_manager.current_state.update(dt)
             if state_manager.quit:
                 running = False
-
-            state_manager.current_state.update(dt)
             state_manager.current_state.render(screen)
 
         pygame.display.flip()

@@ -23,7 +23,9 @@ class MainMenuState(BaseState):
     def get_selected(self):
         choice = self.OPTIONS[self.__selected]
         if choice == "New Game":
-            self.manager.change_state("play")  # или конкретный PlayState
+            self.manager.game_session.start_level(1)
+            message = self.manager.game_session.current_level.briefing_message
+            self.manager.change_state("briefing", message=message)  # или конкретный PlayState
         elif choice == "Load Game":
             self.manager.change_state("load")  # State для загрузки
         else:

@@ -1,9 +1,11 @@
 import pygame
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, TYPE_CHECKING
 
-from src.entities.entity import Shape, Entity
-from src.entities.projectile import Projectile
-from src.entities.weapon import Weapon
+
+if TYPE_CHECKING:
+    from src.entities.projectile import Projectile
+    from src.entities.entity import Shape, Entity
+    from src.entities.weapon import Weapon
 
 
 class Bullet(Projectile):
@@ -21,10 +23,10 @@ class Bullet(Projectile):
         x: float,
         y: float,
         direction: Tuple[float, float],
-        source: Weapon,
+        source: 'Weapon',
         damage: Optional[float] = None,
         picture: Optional[Any] = None,
-        shape: Optional[Shape] = None,
+        shape: Optional['Shape'] = None,
         radius: int = 1,
         color: Tuple[int, int, int] = (255, 255, 0),
     ) -> None:
@@ -54,7 +56,7 @@ class Bullet(Projectile):
     #  Public methods
     # -----------------
 
-    def on_collision(self, target: Entity) -> None:
+    def on_collision(self, target: 'Entity') -> None:
         """
         Вызывается движком при столкновении.
 

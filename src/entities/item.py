@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from src.entities.character import Character
 from src.entities.entity import Entity, Shape
+from src.game.entity_manager import EntityManager
 
 
 class Item(Entity, ABC):
@@ -12,6 +13,7 @@ class Item(Entity, ABC):
 
     def __init__(
         self,
+        entity_manager: EntityManager,
         entity_id: int,
         x: float,
         y: float,
@@ -24,6 +26,7 @@ class Item(Entity, ABC):
     ) -> None:
         # У предметов всегда collectable = True
         super().__init__(
+            entity_manager=entity_manager,
             entity_id=entity_id,
             x=x,
             y=y,

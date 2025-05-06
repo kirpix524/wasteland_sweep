@@ -22,7 +22,6 @@ class Level:
         self,
         level_id: str,
         name: str,
-        entities: List[Entity],
         briefing_message: str,
         entity_factory: EntityFactory,
         player_controller: Optional[PlayerController] = None,
@@ -121,14 +120,14 @@ class Level:
         level_bg=pygame.image.load(level_bg_path).convert()
         level = Level(level_id,
                       level_name,
-                      [],
                       briefing_message,
                       entity_factory,
                       background=level_bg)
         player_image = pygame.image.load(PLAYER_IMAGE)
         player_image = pygame.transform.scale(player_image, (PLAYER_WIDTH, PLAYER_HEIGHT))
         print(f"player image: {player_image} {player_image.get_size()}")
-        player = Player(0,
+        player = Player(level.entity_manager,
+                        0,
                         300,
                         300,
                         100,
@@ -144,7 +143,8 @@ class Level:
 
         ak_picture = pygame.image.load(AK_IMAGE)
         ak_picture = pygame.transform.scale(ak_picture, (AK_WIDTH, AK_HEIGHT))
-        ak47 = Weapon(0,
+        ak47 = Weapon(level.entity_manager,
+                      0,
                       600,
                       300,
                       "ak-47",

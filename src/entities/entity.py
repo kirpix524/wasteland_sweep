@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, Any, Optional
-import math
+from typing import Tuple, Any, Optional, TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from src.game.entity_manager import EntityManager
+
 
 class Shape(ABC):
     """
@@ -163,6 +167,7 @@ class Entity(ABC):
 
     def __init__(
         self,
+        entity_manager: 'EntityManager',
         entity_id: int,
         x: float = 0.0,
         y: float = 0.0,
@@ -171,6 +176,7 @@ class Entity(ABC):
         picture: Optional[Any] = None,
         shape: Optional[Shape] = None
     ) -> None:
+        self._manager: 'EntityManager' = entity_manager
         self._id: int = entity_id
         self._position: Tuple[float, float] = (x, y)
         self._angle: float = angle

@@ -9,6 +9,8 @@ from src.entities.entity import Shape
 from src.entities.projectile import Projectile
 from src.game.animation import Animation
 from src.entities.weapon import Weapon
+from src.game.entity_manager import EntityManager
+
 
 class Player(Character):
     """
@@ -17,6 +19,7 @@ class Player(Character):
 
     def __init__(
         self,
+        entity_manager: 'EntityManager',
         entity_id: int,
         x: float,
         y: float,
@@ -34,7 +37,7 @@ class Player(Character):
     ) -> None:
         print(f"01 picture: {picture}")
         super().__init__(
-            entity_id, x, y,
+            entity_manager, entity_id, x, y,
             health, max_health,
             speed, attack, defense,
             vision_range, hearing_range,

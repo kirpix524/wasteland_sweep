@@ -6,6 +6,7 @@ from typing import Any, Optional, List
 from src.entities.entity import Entity, Shape
 from src.entities.modifier import Modifier
 from src.game.animation import Animation
+from src.game.entity_manager import EntityManager
 
 
 class Character(Entity, ABC):
@@ -16,6 +17,7 @@ class Character(Entity, ABC):
 
     def __init__(
         self,
+        entity_manager: EntityManager,
         entity_id: int,
         x: float,
         y: float,
@@ -33,7 +35,7 @@ class Character(Entity, ABC):
         animation: Optional[Animation] = None,
         shape: Optional[Shape] = None
     ) -> None:
-        super().__init__(entity_id, x, y, angle, collectable, picture, shape)
+        super().__init__(entity_manager, entity_id, x, y, angle, collectable, picture, shape)
 
         # базовые значения
         self._health: float = health

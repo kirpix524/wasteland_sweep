@@ -4,6 +4,8 @@ from typing import Any, Optional, List, TYPE_CHECKING
 import pygame
 
 from src.entities.item import Item
+from src.game.entity_manager import EntityManager
+
 if TYPE_CHECKING:
     from src.entities.entity import Shape
     from src.entities.modifier import Modifier
@@ -21,6 +23,7 @@ class Weapon(Item):
 
     def __init__(
         self,
+        entity_manager: EntityManager,
         entity_id: int,
         x: float,
         y: float,
@@ -37,6 +40,7 @@ class Weapon(Item):
         shape: Optional['Shape'] = None
     ) -> None:
         super().__init__(
+            entity_manager=entity_manager,
             entity_id=entity_id,
             x=x,
             y=y,
@@ -163,6 +167,37 @@ class Weapon(Item):
     def fire(self, direction: pygame.Vector2) -> Optional['Projectile']:
         """
         Выполнить выстрел в заданном направлении.
-        Должен вернуть объект Projectile или None, если выстрел невозможен.
+
+        :param direction: Нормализованный вектор направления полёта.
+        :return: Bullet либо None, если выстрел невозможен.
         """
-        ...
+        from src.entities.bullet import Bullet
+        # 1. Проверяем, что можем стрелять
+        if not self.can_fire():
+            return None
+        if self._current_ammo <= 0:
+            self.start_reload(None)  # Автоматически запускаем перезарядку
+            return None
+
+        # 2. Нормализуем направление
+        if direction.length_squared() == 0:
+            return None
+        direction = direction.normalize()
+
+        # 3. Создаём пулю
+        bullet: Projectile = Bullet(
+            entity_id=0,
+            x=self.position[0],
+            y=self.position[1],
+            direction=(direction.x, direction.y),
+            source=self,
+        )
+
+        self._manager.add_existing_entity(bullet)
+
+        # 4. Обновляем счётчик патронов
+        self._current_ammo -= 1
+        if self._current_ammo == 0:
+            self.start_reload(None)
+
+        return bullet

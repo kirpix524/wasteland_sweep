@@ -1,9 +1,13 @@
 import math
 from abc import ABC, abstractmethod
-from typing import Tuple, Optional, Any
+from typing import Tuple, Optional, Any, TYPE_CHECKING
 
 from src.entities.entity import Entity, Shape
-from src.entities.weapon import Weapon
+
+
+if TYPE_CHECKING:
+    from src.entities.weapon import Weapon
+    from src.game.entity_manager import EntityManager
 
 
 class Projectile(Entity, ABC):
@@ -20,16 +24,18 @@ class Projectile(Entity, ABC):
     """
     def __init__(
         self,
+        entity_manager: 'EntityManager',
         entity_id: int,
         x: float,
         y: float,
         direction: Tuple[float, float],
-        source: Weapon,
+        source: 'Weapon',
         damage: float = None,
         picture: Optional[Any] = None,
         shape: Optional[Shape] = None
     ) -> None:
         super().__init__(
+            entity_manager=entity_manager,
             entity_id=entity_id,
             x=x,
             y=y,
@@ -42,7 +48,7 @@ class Projectile(Entity, ABC):
         if damage is None:
             damage = source.attack_power
         self._damage: float = damage
-        self._source: Weapon = source
+        self._source: 'Weapon' = source
         # Speed and range are taken from the weapon that fired the projectile
         self._speed: float = source.bullet_speed
         self._max_range: float = source.firing_range
@@ -65,7 +71,7 @@ class Projectile(Entity, ABC):
         return self._max_range
 
     @property
-    def source(self) -> Weapon:
+    def source(self) -> 'Weapon':
         """Оружие, выпустившее этот снаряд."""
         return self._source
 

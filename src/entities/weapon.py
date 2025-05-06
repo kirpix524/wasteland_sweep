@@ -77,6 +77,10 @@ class Weapon(Item):
         self._reload_timer: float = 0.0
 
     @property
+    def current_ammo(self) -> int:
+        return self._current_ammo
+
+    @property
     def firing_range(self) -> float:
         return self._firing_range + sum(m.value for m in self._firing_range_mods)
 
@@ -186,6 +190,7 @@ class Weapon(Item):
 
         # 3. Создаём пулю
         bullet: Projectile = Bullet(
+            entity_manager=self._manager,
             entity_id=0,
             x=self.position[0],
             y=self.position[1],

@@ -83,6 +83,8 @@ class Player(Character):
                     inv_item.quantity += item.quantity
                     return
         self._inventory.append(item)
+        if isinstance(item, Weapon):
+            self.equip_weapon(item)
 
     def remove_from_inventory(self, item: Item) -> None:
         """Удалить предмет из инвентаря."""
@@ -148,21 +150,6 @@ class Player(Character):
         """
         super().update(delta_time)
 
-        # 1) Проверка и разрешение столкновений
-        self._check_collisions()
-
-
-    def _check_collisions(self) -> None:
-        """
-        Находит все объекты, с которыми столкнулся игрок, и разрешает столкновение.
-        """
-        # Пример: вызываем метод физического движка или world-сцену
-        # collisions = self._game_world.get_collisions(self)
-        # for obj in collisions:
-        #     self._resolve_collision(obj)
-        pass
-
-
     def render(self, surface: pygame.Surface) -> None:
         """
         Отрисовка игрока на экране с учётом текущего угла поворота ``angle``.
@@ -188,10 +175,21 @@ class PlayerController:
         self._player: 'Player' = player
         self._move_x: int = 0
         self._move_y: int = 0
+        self._aim_direction: pygame.Vector2 = pygame.Vector2()
 
     @property
     def player(self) -> 'Player':
         return self._player
+
+    @property
+    def position(self) -> pygame.Vector2:
+        """Текущее положение центра игрока в мировых координатах."""
+        return pygame.Vector2(self.player.position[0], self.player.position[1])
+
+    @property
+    def aim_direction(self) -> pygame.Vector2:
+        """Нормализованный вектор направления прицеливания."""
+        return self._aim_direction
 
     def _update_velocity(self) -> None:
         """
@@ -235,7 +233,8 @@ class PlayerController:
         """
         Стреляет по позиции мыши, если оружие экипировано.
         """
-        self._player.fire_bullet(target)
+        self.update_aim(target)
+        self._player.fire_bullet(self.aim_direction)
 
     def reload(self) -> None:
         """
@@ -250,3 +249,8 @@ class PlayerController:
         dx: float = target.x - self._player.position[0]
         dy: float = target.y - self._player.position[1]
         self._player.angle = -pygame.Vector2(dx, dy).angle_to(pygame.Vector2(1, 0))
+
+        direction: pygame.Vector2 = target - self.position
+        if direction.length_squared() > 0:
+            self._aim_direction = direction.normalize()
+

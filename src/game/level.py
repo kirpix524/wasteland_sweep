@@ -3,6 +3,7 @@ from typing import List, Tuple, Optional, Any
 import pygame
 
 from src.entities.entity import Entity, CircleShape, RectangleShape
+from src.entities.item import Item
 from src.entities.player import PlayerController, Player
 from src.entities.weapon import Weapon
 from src.game.entity_factory import EntityFactory
@@ -96,9 +97,23 @@ class Level:
 
     def update(self, delta_time: float) -> None:
         """Обновить все сущности и триггеры на уровне."""
-        # Обновление сущностей
         for e in list(self.entities):
             e.update(delta_time)
+        self._check_item_pickup()
+
+    def _check_item_pickup(self) -> None:
+        """Проверить, подобрал ли игрок предметы, и обработать сбор."""
+        if self._player_controller is None:
+            return
+
+        player: Entity = self._player_controller.player
+        for item in [e for e in self.entities if isinstance(e, Item)]:
+            if player.collides_with(item):
+                if not item.collectable or not item.active:
+                    continue
+                if hasattr(self._player_controller.player, "add_to_inventory"):
+                    self._player_controller.player.add_to_inventory(item)
+                self.remove_entity(item)
 
     def render(self, surface: Any) -> None:
         """Отрисовать тайл-карту, фон и все сущности."""
@@ -150,7 +165,7 @@ class Level:
                       "ak-47",
                       "ak-47 rifle",
                       400,
-                      1000,
+                      500,
                       150,
                       6,
                       500,

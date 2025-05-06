@@ -27,31 +27,22 @@ class PlayStateInputHandler:
         """
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                print("move left")
                 controller.start_move_left()
             elif event.key == pygame.K_d:
-                print("move right")
                 controller.start_move_right()
             elif event.key == pygame.K_w:
-                print("move up")
                 controller.start_move_up()
             elif event.key == pygame.K_s:
-                print("move down")
                 controller.start_move_down()
             elif event.key == pygame.K_r:
-                print("reload")
                 controller.reload()
         elif event.type == pygame.KEYUP:
             if event.key in (pygame.K_a, pygame.K_d):
-                print("stop move horizontal")
                 controller.stop_move_horizontal()
             elif event.key in (pygame.K_w, pygame.K_s):
-                print("stop move vertical")
                 controller.stop_move_vertical()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # левая кнопка
-                print("shoot")
                 controller.shoot(pygame.Vector2(event.pos))
         elif event.type == pygame.MOUSEMOTION:
-            print("aim")
             controller.update_aim(pygame.Vector2(event.pos))

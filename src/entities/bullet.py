@@ -1,11 +1,12 @@
 import pygame
 from typing import Any, Optional, Tuple, TYPE_CHECKING
 
+from src.entities.projectile import Projectile
 
 if TYPE_CHECKING:
-    from src.entities.projectile import Projectile
     from src.entities.entity import Shape, Entity
     from src.entities.weapon import Weapon
+    from src.game.entity_manager import EntityManager
 
 
 class Bullet(Projectile):
@@ -19,6 +20,7 @@ class Bullet(Projectile):
 
     def __init__(
         self,
+        entity_manager: 'EntityManager',
         entity_id: int,
         x: float,
         y: float,
@@ -31,6 +33,7 @@ class Bullet(Projectile):
         color: Tuple[int, int, int] = (255, 255, 0),
     ) -> None:
         super().__init__(
+            entity_manager=entity_manager,
             entity_id=entity_id,
             x=x,
             y=y,

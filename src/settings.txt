@@ -1,9 +1,14 @@
 # Screen dimensions
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
+PLAYER_WIDTH = 64
+PLAYER_HEIGHT = 32
+AK_WIDTH = 90
+AK_HEIGHT = 45
 MENU_BG_IMAGE = resources/images/main_menu_bg.png
 BRIEFING_BG_IMAGE = resources/images/main_menu_bg.png
-PLAYER_IMAGE = resources/images/storm_trooper_rifle1.png
+PLAYER_IMAGE = resources/images/graphic-assault-type-cs-unit.png
+AK_IMAGE = resources/images/ak.png
 LEVEL_1_BG = resources/images/level_1_bg.png
 LEVEL_PATHS = [
     "resources/images/level1.json",

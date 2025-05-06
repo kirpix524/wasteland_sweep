@@ -2,11 +2,12 @@ from typing import List, Tuple, Optional, Any
 
 import pygame
 
-from src.entities.entity import Entity
+from src.entities.entity import Entity, CircleShape, RectangleShape
 from src.entities.player import PlayerController, Player
+from src.entities.weapon import Weapon
 from src.game.entity_factory import EntityFactory
 from src.game.entity_manager import EntityManager
-from src.settings import PLAYER_IMAGE
+from src.settings import PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT, AK_IMAGE, AK_WIDTH, AK_HEIGHT
 from src.utils.level_file_manager import LevelFileManager
 
 
@@ -33,8 +34,6 @@ class Level:
         # Название уровня
         self._name: str = name
         self._briefing_message: str = briefing_message
-        # Все сущности на уровне
-        self._entities: List[Entity] = entities
         # Фоновые настройки: изображение, анимация
         self._background: Optional[Any] = background
         # Фоновая музыка для уровня
@@ -68,7 +67,7 @@ class Level:
 
     @property
     def entities(self) -> List[Entity]:
-        return list(self._entities)
+        return self._entity_manager.all_entities
 
     @property
     def background(self) -> Optional[Any]:
@@ -80,17 +79,17 @@ class Level:
 
     def add_entity(self, entity: Entity) -> None:
         """Добавить игровую сущность на уровень."""
-        self._entities.append(entity)
+        self.entity_manager.add_existing_entity(entity)
 
     def remove_entity(self, entity: Entity) -> None:
         """Удалить игровую сущность с уровня."""
-        self._entities.remove(entity)
+        self.entity_manager.remove_entity_by_id(entity.id)
 
     def get_entities_in_area(self, area: Tuple[int, int, int, int]) -> List[Entity]:
         """Вернуть список сущностей в заданной прямоугольной зоне (x, y, w, h)."""
         x, y, w, h = area
         result: List[Entity] = []
-        for e in self._entities:
+        for e in self.entities:
             ex, ey = e.position
             if x <= ex <= x + w and y <= ey <= y + h:
                 result.append(e)
@@ -99,7 +98,7 @@ class Level:
     def update(self, delta_time: float) -> None:
         """Обновить все сущности и триггеры на уровне."""
         # Обновление сущностей
-        for e in list(self._entities):
+        for e in list(self.entities):
             e.update(delta_time)
 
     def render(self, surface: Any) -> None:
@@ -108,7 +107,7 @@ class Level:
         if self._background:
             surface.blit(self._background, (0, 0))
         # Рисуем сущности
-        for e in self._entities:
+        for e in self.entities:
             e.render(surface)
 
     @classmethod
@@ -127,11 +126,44 @@ class Level:
                       entity_factory,
                       background=level_bg)
         player_image = pygame.image.load(PLAYER_IMAGE)
-        player = Player(0, 100, 100, 100, 100, 50, 10, 10, 300, 150,0, picture=player_image)
+        player_image = pygame.transform.scale(player_image, (PLAYER_WIDTH, PLAYER_HEIGHT))
+        print(f"player image: {player_image} {player_image.get_size()}")
+        player = Player(0,
+                        300,
+                        300,
+                        100,
+                        100,
+                        150,
+                        10,
+                        10,
+                        300,
+                        150,
+                        0,
+                        picture=player_image,
+                        shape=CircleShape(300, 300, 20))
+
+        ak_picture = pygame.image.load(AK_IMAGE)
+        ak_picture = pygame.transform.scale(ak_picture, (AK_WIDTH, AK_HEIGHT))
+        ak47 = Weapon(0,
+                      600,
+                      300,
+                      "ak-47",
+                      "ak-47 rifle",
+                      400,
+                      1000,
+                      150,
+                      6,
+                      500,
+                      300,
+                      30,
+                      ak_picture,
+                      RectangleShape(600, 300, AK_WIDTH, AK_HEIGHT))
+
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)
         level._player_controller = player_controller
         player.on_shoot.append(level.add_entity)
+        level.entity_manager.add_existing_entity(ak47)
         return level
 
     def save_to_file(self, path: str) -> None:

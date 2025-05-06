@@ -10,9 +10,14 @@ if TYPE_CHECKING:
     SCREEN_WIDTH: int
     SCREEN_HEIGHT: int
     FPS: int
+    PLAYER_WIDTH: int
+    PLAYER_HEIGHT: int
     MENU_BG_IMAGE: str
     BRIEFING_BG_IMAGE: str
     PLAYER_IMAGE: str
+    AK_IMAGE: str
+    AK_WIDTH: int
+    AK_HEIGHT: int
     LEVEL_PATHS: List[str]
     TITLE: str
 

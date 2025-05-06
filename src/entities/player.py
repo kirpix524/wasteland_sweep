@@ -32,13 +32,15 @@ class Player(Character):
         animation: Optional[Animation] = None,
         shape: Optional[Shape] = None
     ) -> None:
+        print(f"01 picture: {picture}")
         super().__init__(
             entity_id, x, y,
             health, max_health,
             speed, attack, defense,
             vision_range, hearing_range,
-            angle, False, picture, animation, shape
+            angle, False, True,picture, animation, shape
         )
+        print(f"02 picture: {self.picture}")
         # Инвентарь игрока
         self._inventory: List[Item] = []
         # Экипированное оружие и броня
@@ -158,15 +160,25 @@ class Player(Character):
         pass
 
 
-    def render(self, surface: Any) -> None:
+    def render(self, surface: pygame.Surface) -> None:
         """
-        Отрисовка игрока на экране.
+        Отрисовка игрока на экране с учётом текущего угла поворота ``angle``.
+        Поворот выполняется вокруг центра спрайта.
         """
+        # Вызываем базовый render (например, для хитбокса или дополнительных эффектов)
         super().render(surface)
-        # TODO: отрисовать HUD и прицел
+        # Определяем, какой спрайт рисовать: кадр анимации или статичную картинку
+        sprite: Optional[pygame.Surface] = (
+            #self._animation.get_image() if self._animation is not None else self._picture
+            self.picture
+        )
+        #print(f"sprite: {sprite} picture: {self.picture}")
 
-
-
+        if sprite is not None:
+            # В pygame положительные углы — против часовой стрелки, поэтому берём «-angle»
+            rotated_sprite: pygame.Surface = pygame.transform.rotate(sprite, -self.angle)
+            rect: pygame.Rect = rotated_sprite.get_rect(center=(self.position[0], self.position[1]))
+            surface.blit(rotated_sprite, rect.topleft)
 
 class PlayerController:
     def __init__(self, player: 'Player') -> None:
@@ -234,4 +246,4 @@ class PlayerController:
         """
         dx: float = target.x - self._player.position[0]
         dy: float = target.y - self._player.position[1]
-        self._player.angle = pygame.Vector2(dx, dy).angle_to(pygame.Vector2(1, 0))
+        self._player.angle = -pygame.Vector2(dx, dy).angle_to(pygame.Vector2(1, 0))

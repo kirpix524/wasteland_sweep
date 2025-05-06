@@ -160,7 +160,6 @@ class Weapon(Item):
         """Проверяет, можно ли сделать выстрел (не в перезарядке)."""
         return not self._is_reloading
 
-    @abstractmethod
     def fire(self, direction: pygame.Vector2) -> Optional['Projectile']:
         """
         Выполнить выстрел в заданном направлении.

@@ -140,7 +140,6 @@ class Level:
                       background=level_bg)
         player_image = pygame.image.load(PLAYER_IMAGE)
         player_image = pygame.transform.scale(player_image, (PLAYER_WIDTH, PLAYER_HEIGHT))
-        print(f"player image: {player_image} {player_image.get_size()}")
         player = Player(level.entity_manager,
                         0,
                         300,
@@ -167,7 +166,7 @@ class Level:
                       400,
                       500,
                       150,
-                      6,
+                      3,
                       500,
                       300,
                       30,

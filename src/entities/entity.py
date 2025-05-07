@@ -183,7 +183,6 @@ class Entity(ABC):
         self._active: bool = True
         self._collectable: bool = collectable
         self._picture: Optional[Any] = picture
-        print(f"entity picture: {self.picture}")
 
         if shape is None:
             self._shape: Shape = RectangleShape(x, y, 0.0, 0.0)

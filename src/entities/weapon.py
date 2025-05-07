@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any, Optional, List, TYPE_CHECKING
+from typing import Any, Optional, List, TYPE_CHECKING, Tuple
 
 import pygame
 
@@ -153,6 +153,7 @@ class Weapon(Item):
             if self._reload_timer >= self.reload_time:
                 self._is_reloading = False
                 self._reload_timer = 0.0
+                self.reload_magazine()
 
     def start_reload(self, available_ammo: Optional[int]) -> None:
         """Начать перезарядку, если оружие не в процессе перезарядки."""
@@ -168,10 +169,11 @@ class Weapon(Item):
         """Проверяет, можно ли сделать выстрел (не в перезарядке)."""
         return not self._is_reloading
 
-    def fire(self, direction: pygame.Vector2) -> Optional['Projectile']:
+    def fire(self, player_position: Tuple[float, float], direction: pygame.Vector2) -> Optional['Projectile']:
         """
         Выполнить выстрел в заданном направлении.
 
+        :param player_position: Текущие координаты игрока.
         :param direction: Нормализованный вектор направления полёта.
         :return: Bullet либо None, если выстрел невозможен.
         """
@@ -192,8 +194,8 @@ class Weapon(Item):
         bullet: Projectile = Bullet(
             entity_manager=self._manager,
             entity_id=0,
-            x=self.position[0],
-            y=self.position[1],
+            x=player_position[0],
+            y=player_position[1],
             direction=(direction.x, direction.y),
             source=self,
         )

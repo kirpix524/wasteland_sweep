@@ -133,7 +133,7 @@ class Player(Character):
     def fire_bullet(self, target: pygame.Vector2) -> None:
         if self._equipped_weapon is not None:
             if self._equipped_weapon.can_fire():
-                bullet = self._equipped_weapon.fire(target)
+                bullet = self._equipped_weapon.fire(self.position, target)
                 for callback in self.on_shoot:
                     callback(bullet)
 
@@ -149,6 +149,8 @@ class Player(Character):
         – обновление статус-эффектов
         """
         super().update(delta_time)
+        if self._equipped_weapon is not None:
+            self._equipped_weapon.update(delta_time)
 
     def render(self, surface: pygame.Surface) -> None:
         """

@@ -164,7 +164,6 @@ class Player(Character):
             #self._animation.get_image() if self._animation is not None else self._picture
             self.picture
         )
-        #print(f"sprite: {sprite} picture: {self.picture}")
 
         if sprite is not None:
             # В pygame положительные углы — против часовой стрелки, поэтому берём «-angle»

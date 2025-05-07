@@ -4,11 +4,12 @@ import pygame
 
 from src.entities.entity import Entity, CircleShape, RectangleShape
 from src.entities.item import Item
+from src.entities.map_entity import MapEntity
 from src.entities.player import PlayerController, Player
 from src.entities.weapon import Weapon
 from src.game.entity_factory import EntityFactory
 from src.game.entity_manager import EntityManager
-from src.settings import PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT, AK_IMAGE, AK_WIDTH, AK_HEIGHT
+from src.settings import PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT, AK_IMAGE, AK_WIDTH, AK_HEIGHT, DEAD_TANK_IMAGE, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT
 from src.utils.level_file_manager import LevelFileManager
 
 
@@ -172,6 +173,18 @@ class Level:
                       30,
                       ak_picture,
                       RectangleShape(600, 300, AK_WIDTH, AK_HEIGHT))
+
+        tank_picture = pygame.image.load(DEAD_TANK_IMAGE)
+        tank_picture = pygame.transform.scale(tank_picture, (DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT))
+        tank = MapEntity(level.entity_manager,
+                        0,
+                        800,
+                        700,
+                        100,
+                        tank_picture,
+                        RectangleShape(800, 700, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT))
+
+        level.entity_manager.add_existing_entity(tank)
 
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)

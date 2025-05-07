@@ -3,12 +3,19 @@ SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 1000
 PLAYER_WIDTH = 96
 PLAYER_HEIGHT = 69
+PLAYER_IMAGE = resources/images/graphic-assault-type-cs-unit.png
 AK_WIDTH = 60
 AK_HEIGHT = 45
+AK_IMAGE = resources/images/ak.png
+DEAD_TANK_WIDTH = 200
+DEAD_TANK_HEIGHT = 200
+DEAD_TANK_IMAGE = resources/images/dead_tank_1.png
+
 MENU_BG_IMAGE = resources/images/main_menu_bg.png
 BRIEFING_BG_IMAGE = resources/images/main_menu_bg.png
-PLAYER_IMAGE = resources/images/graphic-assault-type-cs-unit.png
-AK_IMAGE = resources/images/ak.png
+
+
+
 LEVEL_1_BG = resources/images/level_1_bg.png
 LEVEL_PATHS = [
     "resources/images/level1.json",

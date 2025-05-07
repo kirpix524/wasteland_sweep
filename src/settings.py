@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     AK_IMAGE: str
     AK_WIDTH: int
     AK_HEIGHT: int
+    DEAD_TANK_IMAGE: str
+    DEAD_TANK_WIDTH: int
+    DEAD_TANK_HEIGHT: int
     LEVEL_PATHS: List[str]
     TITLE: str
 

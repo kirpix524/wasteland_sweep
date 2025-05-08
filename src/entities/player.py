@@ -251,6 +251,8 @@ class PlayerController:
     def mouse_button_down(self, mouse_pos: pygame.Vector2) -> None:
         """Обрабатывает нажатие ЛКМ с учётом режима огня."""
         self.update_aim(mouse_pos)
+        if self._player.equipped_weapon is None:
+            return
         if self.player.equipped_weapon.current_fire_mode == FireMode.AUTO:
             self._is_auto_firing = True
             self._auto_fire_timer = 0.0

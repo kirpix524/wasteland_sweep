@@ -1,8 +1,13 @@
 from typing import Tuple, List, Any, Optional, Dict
 from enum import Enum
 import math
+import random
+
+import pygame
 
 from src.entities.character import Character
+from src.entities.entity import Entity
+from src.entities.player import Player
 from src.game.entity_manager import EntityManager
 
 
@@ -14,22 +19,66 @@ class Attitude(Enum):
 class DecisionModule:
     """
     Модуль принятия решений для NPC.
-    Реализует логику выбора действий на основе восприятия.
+    Реализует логику выбора действий на основе восприятия и
+    возвращает целевую координату, куда должен идти NPC.
     """
-    def decide(self, npc: 'NPC', perceptions: Dict[str, List[Any]]) -> None:
-        """
-        Выполняет шаг принятия решения, используя данные о восприятии:
-        :param npc: экземпляр NPC
-        :param perceptions: словарь с ключами 'visible' и 'audible'
-        """
-        ...  # Переопределяется конкретными модулями
+    def decide(self, npc: 'NPC', perceptions: Dict[str, List[Any]]
+               ) -> Optional[Tuple[float, float]]:
+        ...
+
+
 
 class ZombieDecisionModule(DecisionModule):
     """
     Модуль принятия решений для зомби.
+    Реализует блуждание, погоню и атаку.
     """
-    def decide(self, npc: 'NPC', perceptions: Dict[str, List[Any]]) -> None:
-        pass
+    _WANDER_RADIUS: float = 120.0          # радиус случайного перемещения
+    _WANDER_CHANCE: float = 0.02           # вероятность смены цели блуждания
+
+    def __init__(self) -> None:
+        self._current_target: Optional[Tuple[float, float]] = None
+        self._last_player_pos: Optional[Tuple[float, float]] = None
+
+    def decide(self, npc: 'NPC', perceptions: Dict[str, List[Any]]
+               ) -> Optional[Tuple[float, float]]:
+        player = self._find_player(perceptions['visible'])
+        if player:  # видим игрока — запоминаем и преследуем
+            self._last_player_pos = player.position
+            return player.position                     # преследуем игрока
+
+        if self._last_player_pos is not None:
+            dist = math.hypot(
+                self._last_player_pos[0] - npc.position[0],
+                self._last_player_pos[1] - npc.position[1]
+            )
+            if dist > 5.0:  # ещё не дошли
+                return self._last_player_pos
+            self._last_player_pos = None  # пришли на место — забываем
+
+        return self._wander(npc)                          # иначе блуждаем
+
+    # -------- protected helpers --------
+    def _find_player(self, visibles: List[Entity]) -> Optional[Any]:
+        for ent in visibles:
+            if isinstance(ent, Player):
+                return ent
+        return None
+
+    def _wander(self, npc: 'NPC') -> Tuple[float, float]:
+        if (
+            self._current_target is None
+            or npc.position == self._current_target
+            or random.random() < self._WANDER_CHANCE
+        ):
+            self._current_target = self._random_point_near(npc.position)
+        return self._current_target
+
+    def _random_point_near(self, origin: Tuple[float, float]) -> Tuple[float, float]:
+        angle: float = random.uniform(0.0, 2 * math.pi)
+        radius: float = random.uniform(20.0, self._WANDER_RADIUS)
+        return origin[0] + radius * math.cos(angle), origin[1] + radius * math.sin(angle)
+
 
 class NPC(Character):
     """
@@ -55,7 +104,8 @@ class NPC(Character):
         angle: float = 0.0,
         picture_alive: Optional[Any] = None,
         picture_dead: Optional[Any] = None,
-        shape: Optional[Any] = None
+        shape: Optional[Any] = None,
+        attack_rate: float = 1.5
     ) -> None:
         super().__init__(
             entity_manager=entity_manager,
@@ -81,8 +131,11 @@ class NPC(Character):
         self._current_waypoint_index: int = 0
         # Ссылка на текущее состояние мира для восприятия
         self._game_state: Optional[Any] = None
-        self._picture_alive = picture_alive
-        self._picture_dead = picture_dead
+        self._picture_alive: Optional[Any] = picture_alive
+        self._picture_dead: Optional[Any] = picture_dead
+        self._attack_rate: float = attack_rate
+        self._attack_timer: float = 0
+        self._able_to_attack: bool = True
 
     @property
     def name(self) -> str:
@@ -115,11 +168,11 @@ class NPC(Character):
         Составляет список видимых и слышимых объектов вокруг NPC,
         используя сохранённое состояние мира (self._game_state).
         """
-        visible: List[Any] = []
-        audible: List[Any] = []
-        if not self._game_state:
+        visible: List['Entity'] = []
+        audible: List['Entity'] = []
+        if not self._entity_manager.all_entities:
             return {'visible': visible, 'audible': audible}
-        for entity in self._game_state.entities:
+        for entity in self._entity_manager.all_entities:
             if entity is self or not entity.active:
                 continue
             ex, ey = entity.position
@@ -127,8 +180,8 @@ class NPC(Character):
             dist = math.hypot(ex - sx, ey - sy)
             if dist <= self.vision_range:
                 visible.append(entity)
-            if dist <= self.hearing_range:
-                audible.append(entity)
+            # if dist <= self.hearing_range:
+            #     audible.append(entity)
         return {'visible': visible, 'audible': audible}
 
     def update(self, delta_time: float) -> None:
@@ -138,48 +191,93 @@ class NPC(Character):
         2. Принятие решения модулем ИИ
         3. Действие (патрулирование или другое)
         """
-        #print(f"NPC {self.name} has {self.health} health")
-        # Восприятие мира
-        perceptions = self.perceive()
+        if not self.is_alive:
+            return
         # Принятие решения
-        self._decision_module.decide(self, perceptions)
-        # Патрулирование по маршруту
+        perceptions = self.perceive()
+
+        # координата, куда должен идти зомби
+        target: Optional[Tuple[float, float]] = self._decision_module.decide(
+            self, perceptions
+        )
+
+        if target:
+            self._route.clear()
+            self._route.append(target)
+
+            # разворот к цели
+            dx, dy = target[0] - self.position[0], target[1] - self.position[1]
+            if dx or dy:
+                self.angle = math.atan2(dy, dx)
+
+        # движение по маршруту
         if self._route:
-            target = self._route[self._current_waypoint_index]
-            self.move_towards(target, delta_time)
-            if self.position == target:
-                self._current_waypoint_index = (
-                    self._current_waypoint_index + 1
-                ) % len(self._route)
+            self.move_towards(self._route[0], delta_time)
+
+
+
+        # проверка возможности атаки
+        player = next(
+            (e for e in perceptions['visible'] if isinstance(e, Player)),
+            None
+        )
+
+        if not self._able_to_attack:
+            self._attack_timer += delta_time
+            if self._attack_timer >= self._attack_rate:
+                self._attack_timer = 0
+                self._able_to_attack = True
+
+        if player:
+            if self.can_attack(player) and self._able_to_attack:
+                player.take_damage(self.attack)
+                self._attack_timer = 0
+                self._able_to_attack = False
+                return
+
 
     def move_towards(self, target: Tuple[float, float], delta_time: float) -> None:
         """
-        Двигаться к указанной точке с учётом speed и delta_time.
+        Двигаться к указанной точке, используя _apply_movement для обработки столкновений.
         """
         tx, ty = target
         x, y = self.position
         dx, dy = tx - x, ty - y
-        distance = math.hypot(dx, dy)
+        distance: float = math.hypot(dx, dy)
+
+        # если уже на месте — останавливаемся
         if distance == 0:
+            self._velocity.update(0, 0)
             return
+
+        # нормализованный вектор к цели
         nx, ny = dx / distance, dy / distance
-        move = self.speed * delta_time
-        if move >= distance:
-            self.position = target
-        else:
-            self.position = (x + nx * move, y + ny * move)
+
+        # расстояние, которое можем пройти за этот тик
+        step_distance: float = min(self.speed * delta_time, distance)
+
+        # скорость в мировых координатах (ед./сек)
+        self._velocity.update(
+            nx * step_distance / delta_time,
+            ny * step_distance / delta_time,
+        )
+
+        # фактическое перемещение c учётом коллизий
+        self._apply_movement(delta_time)
+
+        # сбрасываем скорость, чтобы не двигаться без приказа в следующем тике
+        self._velocity.update(0, 0)
 
     def render(self, surface: Any) -> None:
         """
-        Отрисовать NPC на экране.
+        Отрисовать NPC на экране с учётом его текущего угла поворота.
         """
-        super().render(surface)
-        if self.is_alive:
-            picture = self._picture_alive
-        else:
-            picture = self._picture_dead
-        rect=picture.get_rect(center=self.position)
-        surface.blit(picture, rect)
-        # (опционально) отладочная отрисовка маршрута
-        # for pt in self._route:
-        #     pygame.draw.circle(surface, (255,0,0), (int(pt[0]), int(pt[1])), 3)
+        super().render(surface)  # hit-box / debug-отрисовка из Character
+
+        picture = self._picture_alive if self.is_alive else self._picture_dead
+
+        # поворачиваем картинку на угол (в градусах, по часовой стрелке)
+        rotated = pygame.transform.rotate(picture, -math.degrees(self.angle))
+        rect = rotated.get_rect(center=self.position)
+
+        surface.blit(rotated, rect)

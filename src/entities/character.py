@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 from abc import ABC, abstractmethod
@@ -33,7 +35,9 @@ class Character(Entity, ABC):
         can_collect: bool = False,
         picture: Optional[Any] = None,
         animation: Optional[Animation] = None,
-        shape: Optional[Shape] = None
+        shape: Optional[Shape] = None,
+        vision_angle: float = 120.0,
+        attack_range: float = 5.0
     ) -> None:
         super().__init__(entity_manager, entity_id, x, y, angle, collectable, picture, shape, is_solid=True)
 
@@ -42,12 +46,14 @@ class Character(Entity, ABC):
         self._max_health: float = max_health
         self._speed: float = speed
         self._attack: float = attack
+        self._attack_range: float = attack_range
         self._defense: float = defense
         self._velocity: pygame.Vector2 = pygame.Vector2(0.0, 0.0)
         self._vision_range: float = vision_range
         self._hearing_range: float = hearing_range
         self._can_collect: bool = can_collect
         self._is_alive: bool = True
+        self._vision_angle: float = vision_angle
 
         # списки модификаторов
         self._max_health_modifiers: List[Modifier] = []
@@ -57,6 +63,13 @@ class Character(Entity, ABC):
         self._vision_modifiers:     List[Modifier] = []
         self._hearing_modifiers:    List[Modifier] = []
         self._animation: Animation = animation
+
+    @property
+    def is_solid(self) -> bool:
+        if self._is_alive:
+            return self._is_solid
+        else:
+            return False
 
     @property
     def health(self) -> float:
@@ -101,6 +114,49 @@ class Character(Entity, ABC):
     @property
     def is_alive(self) -> bool:
         return self._is_alive
+
+    @property
+    def vision_angle(self) -> float:
+        return self._vision_angle
+
+    def can_attack(self, target: 'Character') -> bool:
+        """
+        Проверяет, находится ли ``target`` в зоне досягаемости атаки.
+
+        Создаёт увеличенную копию собственной формы на величину ``_attack_range``
+        и проверяет пересечение с формой цели.
+
+        :param target: персонаж-цель
+        :return: ``True``, если цель доступна для атаки
+        """
+        if target is self or not target.is_alive:
+            return False
+
+        # --- создаём увеличенную копию формы ---
+        enlarged_shape: Shape
+        if isinstance(self.shape, RectangleShape):
+            x, y, w, h = self.shape.get_bounding_box()
+            enlarged_shape = RectangleShape(
+                x=x,
+                y=y,
+                width=w + 2 * self._attack_range,
+                height=h + 2 * self._attack_range,
+            )
+        elif isinstance(self.shape, CircleShape):
+            x, y, r, _ = self.shape.get_bounding_box()
+            enlarged_shape = CircleShape(
+                center_x=x,
+                center_y=y,
+                radius=r + self._attack_range,
+            )
+        else:
+            # Fallback: проверяем по дистанции между центрами
+            sx, sy = self.position
+            tx, ty = target.position
+            return math.hypot(tx - sx, ty - sy) <= self._attack_range
+
+        # --- проверяем пересечение увеличенной формы с формой цели ---
+        return enlarged_shape.intersects(target.shape)
 
     def take_damage(self, amount: float) -> None:
         """Уменьшает здоровье с учётом текущей защиты."""

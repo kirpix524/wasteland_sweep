@@ -15,9 +15,11 @@ if TYPE_CHECKING:
     BRIEFING_BG_IMAGE: str
     PLAYER_IMAGE: str
     AK_IMAGE: str
+    AK_SOUND: str
     AK_WIDTH: int
     AK_HEIGHT: int
     MINIGUN_IMAGE: str
+    MINIGUN_SOUND: str
     MINIGUN_WIDTH: int
     MINIGUN_HEIGHT: int
     DEAD_TANK_IMAGE: str

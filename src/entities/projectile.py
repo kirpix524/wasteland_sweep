@@ -78,8 +78,8 @@ class Projectile(Entity, ABC):
 
     def update(self, delta_time: float) -> None:
         """
-        Перемещает снаряд, проверяет достижение максимальной дальности
-        и обрабатывает столкновения с другими сущностями.
+        Перемещает снаряд, проверяя столкновения на каждом небольшом под-шаге,
+        чтобы исключить «проскок» объектов при высокой скорости.
         """
         if not self.active:
             return
@@ -91,27 +91,39 @@ class Projectile(Entity, ABC):
 
         ndx: float = dx / length
         ndy: float = dy / length
-        move_dist: float = self._speed * delta_time
-        move_x: float = ndx * move_dist
-        move_y: float = ndy * move_dist
 
-        x, y = self.position
-        self.position = (x + move_x, y + move_y)
+        total_dist: float = self._speed * delta_time
+        step_dist: float = 4.0  # максимальный под-шаг (px)
 
-        # --- проверка столкновений ---
+        travelled: float = 0.0
         source_owner: Entity | None = getattr(self._source, "owner", None)
-        for entity in self._entity_manager.all_entities:
-            if entity is self or entity is source_owner or not entity.active:
-                continue
-            if not entity.is_solid:
-                continue
-            if self.collides_with(entity):
-                self.on_collision(entity)
-                self.active = False
-                break
 
-        # --- дальность ---
-        self._distance_traveled += move_dist
+        while travelled < total_dist and self.active:
+            dist: float = min(step_dist, total_dist - travelled)
+            move_x: float = ndx * dist
+            move_y: float = ndy * dist
+
+            x, y = self.position
+            self.position = (x + move_x, y + move_y)
+
+            # — проверка столкновений каждые step_dist пикселей —
+            for entity in self._entity_manager.all_entities:
+                if (
+                        entity is self
+                        or entity is source_owner
+                        or not entity.active
+                        or not entity.is_solid
+                ):
+                    continue
+                if self.collides_with(entity):
+                    self.on_collision(entity)
+                    self.active = False
+                    break
+
+            travelled += dist
+            self._distance_traveled += dist
+
+        # — проверка достижения максимальной дальности —
         if self._distance_traveled >= self._max_range:
             self.active = False
 

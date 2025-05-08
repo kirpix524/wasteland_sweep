@@ -23,6 +23,8 @@ def main():
     register_states(state_manager)
     state_manager.change_state("menu")
 
+    pygame.mixer.set_num_channels(32)
+
     # Main loop
     running = True
     while running:

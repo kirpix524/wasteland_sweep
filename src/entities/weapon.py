@@ -3,8 +3,8 @@ from enum import Enum, auto
 from typing import Any, Optional, List, TYPE_CHECKING, Tuple
 
 import pygame
+import pygame.mixer
 
-from src.entities.character import Character
 from src.entities.entity import Entity
 from src.entities.item import Item
 from src.game.entity_manager import EntityManager
@@ -46,7 +46,8 @@ class Weapon(Item):
         picture: Optional[Any] = None,
         available_fire_modes: Optional[List[FireMode]] = None,
         firing_rate: Optional[int] = None,
-        shape: Optional['Shape'] = None
+        shape: Optional['Shape'] = None,
+        fire_sound: Optional[str] = None
     ) -> None:
         super().__init__(
             entity_manager=entity_manager,
@@ -68,6 +69,9 @@ class Weapon(Item):
         self._reload_time: float         = reload_time
         self._shot_hearing_range: float  = shot_hearing_range
         self._shot_vision_range: float   = shot_vision_range
+        self._fire_sound: Optional[pygame.mixer.Sound] = (
+            pygame.mixer.Sound(fire_sound) if fire_sound else None
+        )
 
         # Доступные режимы стрельбы
         if available_fire_modes is None:
@@ -181,6 +185,17 @@ class Weapon(Item):
     def firing_rate(self) -> int:
         return self._firing_rate
 
+    def _play_fire_sound(self) -> None:
+        if self._fire_sound is None:
+            return
+
+        # ищем свободный канал; если None ─ освобождаем старейший
+        channel: pygame.mixer.Channel | None = pygame.mixer.find_channel()
+        if channel is None:
+            channel = pygame.mixer.find_channel(force=True)  # прервать самый старый
+
+        channel.play(self._fire_sound)
+
     def set_fire_mode(self, mode: FireMode) -> None:
         """
         Установить режим стрельбы, если он доступен у данного оружия.
@@ -266,4 +281,5 @@ class Weapon(Item):
         if self._current_ammo == 0:
             self.start_reload(None)
 
+        self._play_fire_sound()
         return bullet

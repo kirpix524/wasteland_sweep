@@ -11,8 +11,8 @@ from src.entities.weapon import Weapon, FireMode
 from src.game.entity_factory import EntityFactory
 from src.game.entity_manager import EntityManager
 from src.settings import (PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT,
-                          AK_IMAGE, AK_WIDTH, AK_HEIGHT,
-                          MINIGUN_IMAGE, MINIGUN_WIDTH, MINIGUN_HEIGHT,
+                          AK_IMAGE, AK_WIDTH, AK_HEIGHT, AK_SOUND,
+                          MINIGUN_IMAGE, MINIGUN_WIDTH, MINIGUN_HEIGHT, MINIGUN_SOUND,
                           DEAD_TANK_IMAGE, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT,
                           ZOMBIE_1_ALIVE_IMAGE, ZOMBIE_1_DEAD_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
 from src.utils.level_file_manager import LevelFileManager
@@ -131,7 +131,7 @@ class Level:
             e.render(surface)
 
     def get_picture(self, path: str, width: int, height: int) -> pygame.image:
-        picture = pygame.image.load(path)
+        picture = pygame.image.load(path).convert_alpha()
         picture = pygame.transform.scale(picture, (width, height))
         return picture
 
@@ -172,8 +172,8 @@ class Level:
                       300,
                       "ak-47",
                       "ak-47 rifle",
-                      5000,
-                      3000,
+                      2000,
+                      800,
                       150,
                       3,
                       500,
@@ -182,7 +182,8 @@ class Level:
                       ak_picture,
                       [FireMode.SINGLE, FireMode.AUTO],
                       10,
-                      RectangleShape(600, 300, AK_WIDTH, AK_HEIGHT))
+                      RectangleShape(600, 300, AK_WIDTH, AK_HEIGHT),
+                      fire_sound=AK_SOUND)
         level.entity_manager.add_existing_entity(ak47)
 
         minigun_picture = level.get_picture(MINIGUN_IMAGE, int(MINIGUN_WIDTH*1.2), int(MINIGUN_HEIGHT*1.2))
@@ -192,8 +193,8 @@ class Level:
                          500,
                          "minigun",
                          "big fucking gun",
-                         5000,
-                         4000,
+                         3000,
+                         1000,
                          250,
                          8,
                          700,
@@ -202,7 +203,8 @@ class Level:
                          minigun_picture,
                          [FireMode.AUTO],
                          30,
-                         RectangleShape(600, 500, MINIGUN_WIDTH, MINIGUN_HEIGHT))
+                         RectangleShape(600, 500, MINIGUN_WIDTH, MINIGUN_HEIGHT),
+                         fire_sound=MINIGUN_SOUND)
         level.entity_manager.add_existing_entity(minigun)
 
         tank_picture = level.get_picture(DEAD_TANK_IMAGE, int(DEAD_TANK_WIDTH*1.2), int(DEAD_TANK_HEIGHT*1.2))
@@ -213,20 +215,23 @@ class Level:
                         100,
                         tank_picture,
                         RectangleShape(800, 700, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT))
-        level.entity_manager.add_existing_entity(tank)
+        #level.entity_manager.add_existing_entity(tank)
 
         zombie_alive_picture = level.get_picture(ZOMBIE_1_ALIVE_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
         zombie_dead_picture = level.get_picture(ZOMBIE_1_DEAD_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
-        zombie = NPC(level.entity_manager,
+
+        for i in range(5):
+            for j in range(5):
+                zombie = NPC(level.entity_manager,
                      0,
-                     100,
-                     800,
+                     100+i*100,
+                     600+j*100,
                      1000,
                      1000,
                      20,
                      20,
                      50,
-                     800,
+                     3000,
                      800,
                      "zombie",
                      Attitude.HOSTILE,
@@ -234,8 +239,7 @@ class Level:
                      picture_alive=zombie_alive_picture,
                      picture_dead=zombie_dead_picture,
                      shape=CircleShape(200, 800, 25))
-
-        level.entity_manager.add_existing_entity(zombie)
+                level.entity_manager.add_existing_entity(zombie)
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)
         level._player_controller = player_controller

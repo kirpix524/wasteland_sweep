@@ -6,7 +6,7 @@ import random
 import pygame
 
 from src.entities.character import Character
-from src.entities.entity import Entity
+from src.entities.entity import Entity, CircleShape, RectangleShape, Shape
 from src.entities.player import Player
 from src.game.entity_manager import EntityManager
 
@@ -42,6 +42,7 @@ class ZombieDecisionModule(DecisionModule):
 
     def decide(self, npc: 'NPC', perceptions: Dict[str, List[Any]]
                ) -> Optional[Tuple[float, float]]:
+
         player = self._find_player(perceptions['visible'])
         if player:  # видим игрока — запоминаем и преследуем
             self._last_player_pos = player.position
@@ -136,6 +137,7 @@ class NPC(Character):
         self._attack_rate: float = attack_rate
         self._attack_timer: float = 0
         self._able_to_attack: bool = True
+        self._decision_timer: float = 0
 
     @property
     def name(self) -> str:
@@ -163,25 +165,116 @@ class NPC(Character):
         """
         self._game_state = game_state
 
-    def perceive(self) -> Dict[str, List[Any]]:
+    def _segment_intersects_shape(
+            self,
+            start: Tuple[float, float],
+            end: Tuple[float, float],
+            shape: Shape,
+    ) -> bool:
+        """
+        Возвращает ``True``, если отрезок (start-end) пересекает ``shape``.
+        Поддерживаются ``RectangleShape`` и ``CircleShape``.
+        """
+        sx, sy = start
+        ex, ey = end
+
+        if isinstance(shape, RectangleShape):
+            min_x, min_y, w, h = shape.get_bounding_box()
+            max_x: float = min_x + w
+            max_y: float = min_y + h
+
+            dx: float = ex - sx
+            dy: float = ey - sy
+            t_enter: float = 0.0
+            t_exit: float = 1.0
+
+            for p, q1, q2 in (
+                    (-dx, sx - min_x, sx - max_x),
+                    (dx, max_x - sx, min_x - sx),
+                    (-dy, sy - min_y, sy - max_y),
+                    (dy, max_y - sy, min_y - sy),
+            ):
+                if p == 0.0:
+                    if q1 < 0.0:
+                        return False  # параллельно и вне прямоугольника
+                    continue
+                t0: float = q1 / p
+                t1: float = q2 / p
+                t_enter = max(t_enter, min(t0, t1))
+                t_exit = min(t_exit, max(t0, t1))
+                if t_enter > t_exit:
+                    return False
+            return True
+
+        if isinstance(shape, CircleShape):
+            dx: float = ex - sx
+            dy: float = ey - sy
+            fx: float = sx - shape.center_x
+            fy: float = sy - shape.center_y
+
+            a: float = dx * dx + dy * dy
+            b: float = 2 * (fx * dx + fy * dy)
+            c: float = fx * fx + fy * fy - (shape.radius * shape.radius)
+            discriminant: float = b * b - 4 * a * c
+            if discriminant < 0.0:
+                return False
+            if a ==0.0:
+                return False
+            discriminant = math.sqrt(discriminant)
+            t1: float = (-b - discriminant) / (2 * a)
+            t2: float = (-b + discriminant) / (2 * a)
+            return (0.0 <= t1 <= 1.0) or (0.0 <= t2 <= 1.0)
+
+        return False
+
+    def perceive(self) -> Dict[str, List['Entity']]:
         """
         Составляет список видимых и слышимых объектов вокруг NPC,
-        используя сохранённое состояние мира (self._game_state).
+        учитывая препятствия (is_solid) между NPC и целью.
         """
         visible: List['Entity'] = []
         audible: List['Entity'] = []
-        if not self._entity_manager.all_entities:
+
+        entities: List['Entity'] = self._entity_manager.all_entities
+        if not entities:
             return {'visible': visible, 'audible': audible}
-        for entity in self._entity_manager.all_entities:
+
+        sx, sy = self.position
+
+        for entity in entities:
             if entity is self or not entity.active:
                 continue
+
             ex, ey = entity.position
-            sx, sy = self.position
-            dist = math.hypot(ex - sx, ey - sy)
-            if dist <= self.vision_range:
+            dist: float = math.hypot(ex - sx, ey - sy)
+            if dist > self.vision_range:
+                continue
+
+            # --- проверяем, нет ли твёрдых объектов на линии взгляда ---
+            blocked: bool = False
+            for obstacle in entities:
+                if (
+                    not obstacle.is_solid
+                    or obstacle is self
+                    or obstacle is entity
+                    or not obstacle.active
+                ):
+                    continue
+                if self._segment_intersects_shape(
+                    (sx, sy),
+                    (ex, ey),
+                    obstacle.shape,
+                ):
+                    blocked = True
+                    break
+
+            if not blocked:
                 visible.append(entity)
+
+            # # (при необходимости добавить обработку слуха)
             # if dist <= self.hearing_range:
             #     audible.append(entity)
+
         return {'visible': visible, 'audible': audible}
 
     def update(self, delta_time: float) -> None:
@@ -193,6 +286,7 @@ class NPC(Character):
         """
         if not self.is_alive:
             return
+
         # Принятие решения
         perceptions = self.perceive()
 
@@ -238,35 +332,60 @@ class NPC(Character):
 
     def move_towards(self, target: Tuple[float, float], delta_time: float) -> None:
         """
-        Двигаться к указанной точке, используя _apply_movement для обработки столкновений.
+        Двигается к `target`, пытаясь «скользить» вдоль препятствий.
+        1) Пытаемся сделать полный шаг (dx, dy).
+        2) Если не получилось — пробуем отдельно по главной оси (X или Y),
+           затем по второстепенной.
+        3) Угол поворота меняем **только**, если фактически сдвинулись.
         """
-        tx, ty = target
-        x, y = self.position
-        dx, dy = tx - x, ty - y
-        distance: float = math.hypot(dx, dy)
-
-        # если уже на месте — останавливаемся
-        if distance == 0:
-            self._velocity.update(0, 0)
+        if delta_time == 0.0:
             return
 
-        # нормализованный вектор к цели
-        nx, ny = dx / distance, dy / distance
+        tx, ty = target
+        x,  y  = self.position
+        dx, dy = tx - x, ty - y
+        dist   = math.hypot(dx, dy)
 
-        # расстояние, которое можем пройти за этот тик
-        step_distance: float = min(self.speed * delta_time, distance)
+        if dist == 0.0:
+            self._velocity.update(0.0, 0.0)
+            return
 
-        # скорость в мировых координатах (ед./сек)
-        self._velocity.update(
-            nx * step_distance / delta_time,
-            ny * step_distance / delta_time,
-        )
+        # на сколько можем продвинуться за кадр
+        step: float = min(self.speed * delta_time, dist)
 
-        # фактическое перемещение c учётом коллизий
-        self._apply_movement(delta_time)
+        # упорядочиваем оси: первой идёт та, где смещение больше
+        primary_x_first: bool = abs(dx) >= abs(dy)
+        axes: List[Tuple[float, float]] = []
 
-        # сбрасываем скорость, чтобы не двигаться без приказа в следующем тике
-        self._velocity.update(0, 0)
+        # полный вектор
+        axes.append((dx, dy))
+        # движение только по главной оси
+        if primary_x_first:
+            axes.append((dx, 0.0))
+            axes.append((0.0, dy))
+        else:
+            axes.append((0.0, dy))
+            axes.append((dx, 0.0))
+
+        moved: bool = False
+        for ax, ay in axes:
+            if ax == 0.0 and ay == 0.0:
+                continue
+            adist = math.hypot(ax, ay)
+            nx, ny = ax / adist, ay / adist  # нормализовано
+            vx, vy = nx * step / delta_time, ny * step / delta_time
+            next_pos: Tuple[float, float] = (x + vx * delta_time, y + vy * delta_time)
+
+            if self._entity_manager.can_move(self, next_pos):
+                self._velocity.update(vx, vy)
+                self._apply_movement(delta_time)
+                self.angle = math.atan2(vy, vx)  # поворачиваемся лишь если двинулись
+                moved = True
+                break
+
+        if not moved:
+            # все варианты заблокированы
+            self._velocity.update(0.0, 0.0)
 
     def render(self, surface: Any) -> None:
         """
@@ -280,4 +399,29 @@ class NPC(Character):
         rotated = pygame.transform.rotate(picture, -math.degrees(self.angle))
         rect = rotated.get_rect(center=self.position)
 
+
+        #for t in self._route:
+        #    pygame.draw.circle(surface, (255, 0, 0), t, 5)
+
+
         surface.blit(rotated, rect)
+
+        # ---------- шкала здоровья ----------
+        if self.is_alive:
+            hp_pct: float = max(0.0, min(1.0, self.health / self.max_health))
+            bar_w: int = rect.width
+            bar_h: int = 6
+            bar_x: int = rect.left
+            bar_y: int = rect.top - bar_h - 2
+
+            # цвет: зелёный (100 %) → красный (0 %)
+            red: int = int(255 * (1.0 - hp_pct))
+            green: int = int(255 * hp_pct)
+
+            # рамка
+            pygame.draw.rect(surface, (0, 0, 0),
+                             pygame.Rect(bar_x - 1, bar_y - 1, bar_w + 2, bar_h + 2))
+
+            # заполнение
+            pygame.draw.rect(surface, (red, green, 0),
+                             pygame.Rect(bar_x, bar_y, int(bar_w * hp_pct), bar_h))

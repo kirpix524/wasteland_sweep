@@ -2,7 +2,6 @@
 
 import os
 import ast
-from pathlib import Path
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:

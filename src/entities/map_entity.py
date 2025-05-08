@@ -15,7 +15,7 @@ class MapEntity(Entity):
                  angle: float = 0.0,
                  picture: Optional[Any] = None,
                  shape: Optional[Shape] = None):
-        super().__init__(entity_manager, entity_id, x, y, angle, False, picture, shape)
+        super().__init__(entity_manager, entity_id, x, y, angle, False, picture, shape, is_solid=True)
 
     def render(self, surface: Any) -> None:
         sprite: Optional[pygame.Surface] = (

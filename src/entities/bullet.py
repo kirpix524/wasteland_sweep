@@ -41,7 +41,7 @@ class Bullet(Projectile):
             source=source,
             damage=damage,
             picture=picture,
-            shape=shape,
+            shape=shape
         )
         self._radius: int = radius
         self._color: Tuple[int, int, int] = color

@@ -35,7 +35,7 @@ class Character(Entity, ABC):
         animation: Optional[Animation] = None,
         shape: Optional[Shape] = None
     ) -> None:
-        super().__init__(entity_manager, entity_id, x, y, angle, collectable, picture, shape)
+        super().__init__(entity_manager, entity_id, x, y, angle, collectable, picture, shape, is_solid=True)
 
         # базовые значения
         self._health: float = health
@@ -144,9 +144,32 @@ class Character(Entity, ABC):
         """
         Обновляет позицию персонажа на основе вектора скорости.
         """
-        new_x = self.position[0] + self._velocity.x * delta_time
-        new_y = self.position[1] + self._velocity.y * delta_time
-        self.position = (new_x, new_y)
+        self._apply_movement(delta_time)
 
     def render(self, surface: Any) -> None:
         pass
+
+    def _apply_movement(self, delta_time: float) -> None:
+        """
+        Перемещает персонажа, учитывая столкновения.
+        """
+        if self._velocity.length_squared() == 0:
+            return
+
+        dx: float = self._velocity.x * delta_time
+        dy: float = self._velocity.y * delta_time
+
+        x, y = self.position
+        # полный шаг
+        if self._entity_manager.can_move(self, (x + dx, y + dy)):
+            self.position = (x + dx, y + dy)
+            return
+
+        # попытка по оси X
+        if dx and self._entity_manager.can_move(self, (x + dx, y)):
+            self.position = (x + dx, y)
+            x += dx
+
+        # попытка по оси Y
+        if dy and self._entity_manager.can_move(self, (x, y + dy)):
+            self.position = (x, y + dy)

@@ -42,7 +42,8 @@ class Projectile(Entity, ABC):
             angle=0.0,
             collectable=False,
             picture=picture,
-            shape=shape
+            shape=shape,
+            is_solid=False
         )
         self._direction: Tuple[float, float] = direction
         if damage is None:

@@ -192,7 +192,7 @@ class Weapon(Item):
 
         # 3. Создаём пулю
         bullet: Projectile = Bullet(
-            entity_manager=self._manager,
+            entity_manager=self._entity_manager,
             entity_id=0,
             x=player_position[0],
             y=player_position[1],
@@ -200,7 +200,7 @@ class Weapon(Item):
             source=self,
         )
 
-        self._manager.add_existing_entity(bullet)
+        self._entity_manager.add_existing_entity(bullet)
 
         # 4. Обновляем счётчик патронов
         self._current_ammo -= 1

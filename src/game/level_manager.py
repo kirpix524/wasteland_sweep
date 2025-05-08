@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 
 from src.game.entity_factory import EntityFactory
 
@@ -9,7 +9,7 @@ class LevelManager:
     def __init__(self, level_paths: List[str]) -> None:
         self._level_paths: List[str] = level_paths
         self._current_index: int = -1
-        self._current_level: 'Level' | None = None
+        self._current_level: Optional['Level'] = None
 
     @property
     def current_level(self) -> 'Level':
@@ -39,9 +39,9 @@ class LevelManager:
     def has_next_level(self) -> bool:
         return self._current_index + 1 < len(self._level_paths)
 
-    def load_next_level(self) -> 'Level':
+    def load_next_level(self, entity_factory: 'EntityFactory') -> 'Level':
         if not self.has_next_level():
             raise RuntimeError("No next level available")
-        return self.load_level(self._current_index + 2)
+        return self.load_level(self._current_index + 2, entity_factory)
 
 

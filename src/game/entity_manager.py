@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 from src.entities.entity import Entity
 from src.game.entity_factory import EntityFactory
 
@@ -70,3 +70,22 @@ class EntityManager:
         Возвращает список всех управляющихся сущностей.
         """
         return list(self._entities.values())
+
+    def can_move(self,
+                 entity: 'Entity',
+                 new_pos: Tuple[float, float]) -> bool:
+        """
+        Возвращает True, если entity может переместиться в new_pos,
+        не столкнувшись с твёрдыми объектами.
+        """
+        original: Tuple[float, float] = entity.position
+        entity.position = new_pos
+        try:
+            for other in self.all_entities:
+                if other is entity or not other.is_solid:
+                    continue
+                if entity.collides_with(other):
+                    return False
+            return True
+        finally:
+            entity.position = original

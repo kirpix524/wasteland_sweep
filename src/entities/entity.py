@@ -71,36 +71,48 @@ class RectangleShape(Shape):
         self._height = value
 
     def get_bounding_box(self) -> Tuple[float, float, float, float]:
-        return (self._x, self._y, self._width, self._height)
+        return (
+            self._x - self._width / 2,
+            self._y - self._height / 2,
+            self._width,
+            self._height,
+        )
 
     def intersects(self, other: Shape) -> bool:
         if isinstance(other, RectangleShape):
-            # AABB пересечение
+            half_w_self = self._width / 2
+            half_h_self = self._height / 2
+            half_w_other = other.width / 2
+            half_h_other = other.height / 2
+
             return (
-                self._x < other.x + other.width and
-                self._x + self._width > other.x and
-                self._y < other.y + other.height and
-                self._y + self._height > other.y
+                abs(self._x - other.x) < (half_w_self + half_w_other) and
+                abs(self._y - other.y) < (half_h_self + half_h_other)
             )
+
         elif isinstance(other, CircleShape):
-            # Ближайшая точка прямоугольника к центру круга
-            circle_dist_x = abs(other.center_x - (self._x + self._width / 2))
-            circle_dist_y = abs(other.center_y - (self._y + self._height / 2))
-            if circle_dist_x > (self._width / 2 + other.radius):
+            half_w = self._width / 2
+            half_h = self._height / 2
+
+            circle_dist_x = abs(other.center_x - self._x)
+            circle_dist_y = abs(other.center_y - self._y)
+
+            if circle_dist_x > (half_w + other.radius):
                 return False
-            if circle_dist_y > (self._height / 2 + other.radius):
+            if circle_dist_y > (half_h + other.radius):
                 return False
-            if circle_dist_x <= (self._width / 2):
+            if circle_dist_x <= half_w:
                 return True
-            if circle_dist_y <= (self._height / 2):
+            if circle_dist_y <= half_h:
                 return True
-            # Проверка углового пересечения
+
             corner_dist_sq = (
-                circle_dist_x - self._width / 2
+                circle_dist_x - half_w
             ) ** 2 + (
-                circle_dist_y - self._height / 2
+                circle_dist_y - half_h
             ) ** 2
             return corner_dist_sq <= (other.radius ** 2)
+
         return False
 
 
@@ -174,15 +186,17 @@ class Entity(ABC):
         angle: float = 0.0,
         collectable: bool = False,
         picture: Optional[Any] = None,
-        shape: Optional[Shape] = None
+        shape: Optional[Shape] = None,
+        is_solid: bool = False
     ) -> None:
-        self._manager: 'EntityManager' = entity_manager
+        self._entity_manager: 'EntityManager' = entity_manager
         self._id: int = entity_id
         self._position: Tuple[float, float] = (x, y)
         self._angle: float = angle
         self._active: bool = True
         self._collectable: bool = collectable
         self._picture: Optional[Any] = picture
+        self._is_solid: bool = is_solid
 
         if shape is None:
             self._shape: Shape = RectangleShape(x, y, 0.0, 0.0)
@@ -245,6 +259,14 @@ class Entity(ABC):
     @property
     def shape(self) -> Shape:
         return self._shape
+
+    @property
+    def is_solid(self) -> bool:
+        return self._is_solid
+
+    @is_solid.setter
+    def is_solid(self, value: bool) -> None:
+        self._is_solid = value
 
     def collides_with(self, other: 'Entity') -> bool:
         """

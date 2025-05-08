@@ -1,8 +1,10 @@
 from abc import ABC
 from typing import Any, Optional
 
+import pygame
+
 from src.entities.character import Character
-from src.entities.entity import Entity, Shape
+from src.entities.entity import Entity, Shape, RectangleShape, CircleShape
 from src.game.entity_manager import EntityManager
 
 
@@ -84,6 +86,17 @@ class Item(Entity, ABC):
         """
         Отрисовка предмета на поверхности.
         """
+        debug_color: tuple[int, int, int] = (0, 255, 0)  # ярко-зелёный контур
+
+        if isinstance(self.shape, RectangleShape):
+            x, y, w, h = self.shape.get_bounding_box()
+            pygame.draw.rect(surface, debug_color, pygame.Rect(x, y, w, h), width=1)
+        elif isinstance(self.shape, CircleShape):
+            x, y, w, h = self.shape.get_bounding_box()
+            center: tuple[int, int] = (int(x), int(y))
+            pygame.draw.circle(surface, debug_color, center, int(w / 2), width=1)
+
         if self.picture:
             # предполагаем, что picture — pygame.Surface
-            surface.blit(self.picture, self.position)
+            rect: pygame.Rect = self.picture.get_rect(center=self.position)
+            surface.blit(self.picture, rect)

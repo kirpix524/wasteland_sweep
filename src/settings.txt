@@ -10,6 +10,11 @@ AK_IMAGE = resources/images/ak.png
 DEAD_TANK_WIDTH = 200
 DEAD_TANK_HEIGHT = 200
 DEAD_TANK_IMAGE = resources/images/dead_tank_1.png
+ZOMBIE_1_WIDTH = 100
+ZOMBIE_1_HEIGHT = 100
+ZOMBIE_1_ALIVE_IMAGE = resources/images/zombie_1_alive.png
+ZOMBIE_1_DEAD_IMAGE = resources/images/zombie_1_dead.png
+
 
 MENU_BG_IMAGE = resources/images/main_menu_bg.png
 BRIEFING_BG_IMAGE = resources/images/main_menu_bg.png

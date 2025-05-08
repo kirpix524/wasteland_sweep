@@ -43,7 +43,7 @@ class Drone(NPC):
         route: Optional[List[Tuple[float, float]]] = None,
         behavior: DroneBehavior = DroneBehavior.WAIT,
         angle: float = 0.0,
-        picture: Optional[Any] = None,
+        picture_alive: Optional[Any] = None,
         shape: Optional[Any] = None
     ) -> None:
         super().__init__(
@@ -62,7 +62,7 @@ class Drone(NPC):
             decision_module=decision_module,
             route=route,
             angle=angle,
-            picture=picture,
+            picture_alive=picture_alive,
             shape=shape
         )
         # Инвентарь дрона

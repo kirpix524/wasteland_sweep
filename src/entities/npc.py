@@ -2,7 +2,9 @@ from typing import Tuple, List, Any, Optional, Dict
 from enum import Enum
 import math
 
-from character import Character
+from src.entities.character import Character
+from src.game.entity_manager import EntityManager
+
 
 class Attitude(Enum):
     HOSTILE = "hostile"
@@ -22,12 +24,20 @@ class DecisionModule:
         """
         ...  # Переопределяется конкретными модулями
 
+class ZombieDecisionModule(DecisionModule):
+    """
+    Модуль принятия решений для зомби.
+    """
+    def decide(self, npc: 'NPC', perceptions: Dict[str, List[Any]]) -> None:
+        pass
+
 class NPC(Character):
     """
     Неписи (NPC) с именем, отношением, модулем ИИ и маршрутом патрулирования.
     """
     def __init__(
         self,
+        entity_manager: 'EntityManager',
         entity_id: int,
         x: float,
         y: float,
@@ -43,10 +53,12 @@ class NPC(Character):
         decision_module: DecisionModule,
         route: Optional[List[Tuple[float, float]]] = None,
         angle: float = 0.0,
-        picture: Optional[Any] = None,
+        picture_alive: Optional[Any] = None,
+        picture_dead: Optional[Any] = None,
         shape: Optional[Any] = None
     ) -> None:
         super().__init__(
+            entity_manager=entity_manager,
             entity_id=entity_id,
             x=x,
             y=y,
@@ -59,7 +71,7 @@ class NPC(Character):
             hearing_range=hearing_range,
             angle=angle,
             collectable=False,
-            picture=picture,
+            picture=picture_alive,
             shape=shape
         )
         self._name: str = name
@@ -69,6 +81,8 @@ class NPC(Character):
         self._current_waypoint_index: int = 0
         # Ссылка на текущее состояние мира для восприятия
         self._game_state: Optional[Any] = None
+        self._picture_alive = picture_alive
+        self._picture_dead = picture_dead
 
     @property
     def name(self) -> str:
@@ -124,6 +138,7 @@ class NPC(Character):
         2. Принятие решения модулем ИИ
         3. Действие (патрулирование или другое)
         """
+        #print(f"NPC {self.name} has {self.health} health")
         # Восприятие мира
         perceptions = self.perceive()
         # Принятие решения
@@ -159,7 +174,12 @@ class NPC(Character):
         Отрисовать NPC на экране.
         """
         super().render(surface)
-
+        if self.is_alive:
+            picture = self._picture_alive
+        else:
+            picture = self._picture_dead
+        rect=picture.get_rect(center=self.position)
+        surface.blit(picture, rect)
         # (опционально) отладочная отрисовка маршрута
         # for pt in self._route:
         #     pygame.draw.circle(surface, (255,0,0), (int(pt[0]), int(pt[1])), 3)

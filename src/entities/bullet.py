@@ -69,7 +69,7 @@ class Bullet(Projectile):
         • После первого попадания деактивируется.
         """
         if hasattr(target, "take_damage") and callable(getattr(target, "take_damage")):
-            target.take_damage(self._damage, self._source)  # type: ignore[attr-defined]
+            target.take_damage(self._damage)  # type: ignore[attr-defined]
         self.active = False
         self._entity_manager.remove_entity_by_id(self.id)
 

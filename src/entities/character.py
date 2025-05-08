@@ -3,7 +3,7 @@ import pygame
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List
 
-from src.entities.entity import Entity, Shape
+from src.entities.entity import Entity, Shape, RectangleShape, CircleShape
 from src.entities.modifier import Modifier
 from src.game.animation import Animation
 from src.game.entity_manager import EntityManager
@@ -153,8 +153,22 @@ class Character(Entity, ABC):
         """
         self._apply_movement(delta_time)
 
-    def render(self, surface: Any) -> None:
-        pass
+    def render(self, surface: pygame.Surface) -> None:
+        """
+        Рисует отладочный контур формы персонажа.
+        """
+        debug_color_green: tuple[int, int, int] = (0, 255, 0)  # ярко-зелёный контур
+        debug_color_red: tuple[int, int, int] = (255, 0, 0)  # ярко-красный контур
+
+        if isinstance(self.shape, RectangleShape):
+            x, y, w, h = self.shape.get_bounding_box()
+            center: tuple[int, int] = (int(x), int(y))
+            pygame.draw.rect(surface, debug_color_green, pygame.Rect(x, y, w, h), width=1)
+            pygame.draw.circle(surface, debug_color_red, center, 3)  # точка-центр
+        elif isinstance(self.shape, CircleShape):
+            x, y, w, h = self.shape.get_bounding_box()
+            pygame.draw.circle(surface, debug_color_green, self.position, int(w / 2), width=1)
+            pygame.draw.circle(surface, debug_color_red, self.position, 3)  # точка-центр
 
 
     def _apply_movement(self, delta_time: float) -> None:

@@ -5,11 +5,15 @@ import pygame
 from src.entities.entity import Entity, CircleShape, RectangleShape
 from src.entities.item import Item
 from src.entities.map_entity import MapEntity
+from src.entities.npc import NPC, Attitude, ZombieDecisionModule
 from src.entities.player import PlayerController, Player
 from src.entities.weapon import Weapon
 from src.game.entity_factory import EntityFactory
 from src.game.entity_manager import EntityManager
-from src.settings import PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT, AK_IMAGE, AK_WIDTH, AK_HEIGHT, DEAD_TANK_IMAGE, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT
+from src.settings import (PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT,
+                          AK_IMAGE, AK_WIDTH, AK_HEIGHT,
+                          DEAD_TANK_IMAGE, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT,
+                          ZOMBIE_1_ALIVE_IMAGE, ZOMBIE_1_DEAD_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
 from src.utils.level_file_manager import LevelFileManager
 
 
@@ -125,6 +129,11 @@ class Level:
         for e in self.entities:
             e.render(surface)
 
+    def get_picture(self, path: str, width: int, height: int) -> pygame.image:
+        picture = pygame.image.load(path)
+        picture = pygame.transform.scale(picture, (width, height))
+        return picture
+
     @classmethod
     def load_from_file(cls, path: str, entity_factory: EntityFactory) -> 'Level':
         """Загрузить уровень из JSON/YAML-файла."""
@@ -139,8 +148,7 @@ class Level:
                       briefing_message,
                       entity_factory,
                       background=level_bg)
-        player_image = pygame.image.load(PLAYER_IMAGE)
-        player_image = pygame.transform.scale(player_image, (PLAYER_WIDTH, PLAYER_HEIGHT))
+        player_image = level.get_picture(PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT)
         player = Player(level.entity_manager,
                         0,
                         300,
@@ -154,17 +162,16 @@ class Level:
                         150,
                         0,
                         picture=player_image,
-                        shape=CircleShape(300, 300, 20))
+                        shape=CircleShape(300, 300, 25))
 
-        ak_picture = pygame.image.load(AK_IMAGE)
-        ak_picture = pygame.transform.scale(ak_picture, (AK_WIDTH, AK_HEIGHT))
+        ak_picture = level.get_picture(AK_IMAGE, AK_WIDTH, AK_HEIGHT)
         ak47 = Weapon(level.entity_manager,
                       0,
                       600,
                       300,
                       "ak-47",
                       "ak-47 rifle",
-                      400,
+                      1000,
                       500,
                       150,
                       3,
@@ -174,8 +181,7 @@ class Level:
                       ak_picture,
                       RectangleShape(600, 300, AK_WIDTH, AK_HEIGHT))
 
-        tank_picture = pygame.image.load(DEAD_TANK_IMAGE)
-        tank_picture = pygame.transform.scale(tank_picture, (DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT))
+        tank_picture = level.get_picture(DEAD_TANK_IMAGE, int(DEAD_TANK_WIDTH*1.2), int(DEAD_TANK_HEIGHT*1.2))
         tank = MapEntity(level.entity_manager,
                         0,
                         800,
@@ -183,9 +189,29 @@ class Level:
                         100,
                         tank_picture,
                         RectangleShape(800, 700, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT))
-
         level.entity_manager.add_existing_entity(tank)
 
+        zombie_alive_picture = level.get_picture(ZOMBIE_1_ALIVE_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
+        zombie_dead_picture = level.get_picture(ZOMBIE_1_DEAD_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
+        zombie = NPC(level.entity_manager,
+                     0,
+                     100,
+                     800,
+                     1000,
+                     1000,
+                     10,
+                     10,
+                     50,
+                     300,
+                     500,
+                     "zombie",
+                     Attitude.HOSTILE,
+                     ZombieDecisionModule(),
+                     picture_alive=zombie_alive_picture,
+                     picture_dead=zombie_dead_picture,
+                     shape=CircleShape(200, 800, 25))
+
+        level.entity_manager.add_existing_entity(zombie)
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)
         level._player_controller = player_controller

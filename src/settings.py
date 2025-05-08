@@ -20,6 +20,10 @@ if TYPE_CHECKING:
     DEAD_TANK_IMAGE: str
     DEAD_TANK_WIDTH: int
     DEAD_TANK_HEIGHT: int
+    ZOMBIE_1_ALIVE_IMAGE: str
+    ZOMBIE_1_DEAD_IMAGE: str
+    ZOMBIE_1_WIDTH: int
+    ZOMBIE_1_HEIGHT: int
     LEVEL_PATHS: List[str]
     TITLE: str
 

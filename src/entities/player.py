@@ -166,8 +166,8 @@ class Player(Character):
         if sprite is not None:
             # В pygame положительные углы — против часовой стрелки, поэтому берём «-angle»
             rotated_sprite: pygame.Surface = pygame.transform.rotate(sprite, -self.angle)
-            rect: pygame.Rect = rotated_sprite.get_rect(center=(self.position[0], self.position[1]))
-            surface.blit(rotated_sprite, rect.topleft)
+            rect: pygame.Rect = rotated_sprite.get_rect(center=self.position)
+            surface.blit(rotated_sprite, rect)
 
 class PlayerController:
     def __init__(self, player: 'Player') -> None:

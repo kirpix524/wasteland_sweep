@@ -189,7 +189,6 @@ class Level:
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)
         level._player_controller = player_controller
-        player.on_shoot.append(level.add_entity)
         level.entity_manager.add_existing_entity(ak47)
         return level
 

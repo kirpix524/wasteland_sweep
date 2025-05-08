@@ -78,25 +78,39 @@ class Projectile(Entity, ABC):
 
     def update(self, delta_time: float) -> None:
         """
-        Двигать снаряд и проверять достижение максимальной дальности.
-        Скорость распределяется по осям пропорционально нормализованному вектору направления.
+        Перемещает снаряд, проверяет достижение максимальной дальности
+        и обрабатывает столкновения с другими сущностями.
         """
+        if not self.active:
+            return
+
         dx, dy = self._direction
-        # Нормализация направления
-        length = math.hypot(dx, dy)
+        length: float = math.hypot(dx, dy)
         if length == 0:
             return
-        ndx, ndy = dx / length, dy / length
 
-        # Приращение позиции
-        move_dist = self._speed * delta_time
-        move_x = ndx * move_dist
-        move_y = ndy * move_dist
+        ndx: float = dx / length
+        ndy: float = dy / length
+        move_dist: float = self._speed * delta_time
+        move_x: float = ndx * move_dist
+        move_y: float = ndy * move_dist
 
         x, y = self.position
         self.position = (x + move_x, y + move_y)
 
-        # Учитываем пройденное расстояние по прямой
+        # --- проверка столкновений ---
+        source_owner: Entity | None = getattr(self._source, "owner", None)
+        for entity in self._entity_manager.all_entities:
+            if entity is self or entity is source_owner or not entity.active:
+                continue
+            if not entity.is_solid:
+                continue
+            if self.collides_with(entity):
+                self.on_collision(entity)
+                self.active = False
+                break
+
+        # --- дальность ---
         self._distance_traveled += move_dist
         if self._distance_traveled >= self._max_range:
             self.active = False

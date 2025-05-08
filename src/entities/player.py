@@ -107,6 +107,7 @@ class Player(Character):
                     self.remove_attack_modifier(mod)
         # Экипируем новое оружие
         self._equipped_weapon = weapon
+        self._equipped_weapon.owner = self
         # Добавляем модификатор атаки от нового оружия
         self.add_attack_modifier(Modifier(weapon.attack_power, weapon))
 
@@ -132,10 +133,7 @@ class Player(Character):
 
     def fire_bullet(self, target: pygame.Vector2) -> None:
         if self._equipped_weapon is not None:
-            if self._equipped_weapon.can_fire():
-                bullet = self._equipped_weapon.fire(self.position, target)
-                for callback in self.on_shoot:
-                    callback(bullet)
+            self._equipped_weapon.fire(self.position, target)
 
     def reload_weapon(self) -> None:
         if self._equipped_weapon is not None:

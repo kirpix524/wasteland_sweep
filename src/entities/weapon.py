@@ -3,6 +3,8 @@ from typing import Any, Optional, List, TYPE_CHECKING, Tuple
 
 import pygame
 
+from src.entities.character import Character
+from src.entities.entity import Entity
 from src.entities.item import Item
 from src.game.entity_manager import EntityManager
 
@@ -75,6 +77,7 @@ class Weapon(Item):
         # Внутренние флаги
         self._is_reloading: bool = False
         self._reload_timer: float = 0.0
+        self._owner: Optional['Entity'] = None
 
     @property
     def current_ammo(self) -> int:
@@ -140,6 +143,13 @@ class Weapon(Item):
     def remove_shot_vision_range_modifier(self, mod: 'Modifier') -> None:
         self._shot_vision_range_mods.remove(mod)
 
+    @property
+    def owner(self):
+        return self._owner
+
+    @owner.setter
+    def owner(self, value):
+        self._owner = value
 
     def reload_magazine(self) -> None:
         """Перезарядить магазин до полной вместимости."""
@@ -191,7 +201,7 @@ class Weapon(Item):
         direction = direction.normalize()
 
         # 3. Создаём пулю
-        bullet: Projectile = Bullet(
+        bullet = Bullet(
             entity_manager=self._entity_manager,
             entity_id=0,
             x=player_position[0],

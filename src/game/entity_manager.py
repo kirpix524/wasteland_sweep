@@ -35,6 +35,8 @@ class EntityManager:
 
         :param entity: сущность, которую нужно сохранить
         """
+        if entity is None:
+            return None
         entity_id: int = self._next_id
         self._next_id += 1
         entity.id = entity_id
@@ -61,8 +63,7 @@ class EntityManager:
         """
         if entity_id in self._entities:
             del self._entities[entity_id]
-        else:
-            raise KeyError(f"Entity id {entity_id} not found")
+
 
     @property
     def all_entities(self) -> List[Entity]:

@@ -47,6 +47,7 @@ class Character(Entity, ABC):
         self._vision_range: float = vision_range
         self._hearing_range: float = hearing_range
         self._can_collect: bool = can_collect
+        self._is_alive: bool = True
 
         # списки модификаторов
         self._max_health_modifiers: List[Modifier] = []
@@ -97,10 +98,16 @@ class Character(Entity, ABC):
     def animation(self, animation: Animation) -> None:
         self._animation = animation
 
+    @property
+    def is_alive(self) -> bool:
+        return self._is_alive
+
     def take_damage(self, amount: float) -> None:
         """Уменьшает здоровье с учётом текущей защиты."""
         damage = max(0.0, amount - self.defense)
         self._health = max(0.0, self._health - damage)
+        if self._health == 0.0:
+            self._is_alive = False
 
     def heal(self, amount: float) -> None:
         """Восстанавливает здоровье, но не больше текущего максимума."""
@@ -148,6 +155,7 @@ class Character(Entity, ABC):
 
     def render(self, surface: Any) -> None:
         pass
+
 
     def _apply_movement(self, delta_time: float) -> None:
         """

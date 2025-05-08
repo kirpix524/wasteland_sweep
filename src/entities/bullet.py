@@ -1,6 +1,8 @@
 import pygame
 from typing import Any, Optional, Tuple, TYPE_CHECKING
 
+from pygame.display import update
+
 from src.entities.projectile import Projectile
 
 if TYPE_CHECKING:
@@ -69,6 +71,13 @@ class Bullet(Projectile):
         if hasattr(target, "take_damage") and callable(getattr(target, "take_damage")):
             target.take_damage(self._damage, self._source)  # type: ignore[attr-defined]
         self.active = False
+        self._entity_manager.remove_entity_by_id(self.id)
+
+    def update(self, delta_time: float) -> None:
+        super().update(delta_time)
+        if not self.active:
+            self._entity_manager.remove_entity_by_id(self.id)
+
 
     def render(self, surface: Any) -> None:
         """
@@ -77,15 +86,15 @@ class Bullet(Projectile):
         • Если передан спрайт (pygame.Surface), выводит его с центром в позиции пули.
         • Иначе рисует небольшой круг заданного цвета (ожидается API, совместимое с pygame).
         """
-        if self.picture is not None:  # type: ignore[attr-defined]
-            rect = self.picture.get_rect(center=(int(self.position[0]), int(self.position[1])))  # type: ignore[attr-defined]
-            surface.blit(self.picture, rect)
-        else:
-            # Ленивая локальная импорт‑заглушка — избавляет остальных от жёсткой зависимости
-            import pygame  # noqa: WPS433  (локальный импорт допустим для снижения связности)
-            pygame.draw.circle(
-                surface,
-                self._color,
-                (int(self.position[0]), int(self.position[1])),
-                self._radius,
-            )
+        if self.active:
+            if self.picture is not None:  # type: ignore[attr-defined]
+                rect = self.picture.get_rect(center=(int(self.position[0]), int(self.position[1])))  # type: ignore[attr-defined]
+                surface.blit(self.picture, rect)
+            else:
+                import pygame
+                pygame.draw.circle(
+                    surface,
+                    self._color,
+                    (int(self.position[0]), int(self.position[1])),
+                    self._radius,
+                )

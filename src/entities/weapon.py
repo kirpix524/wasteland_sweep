@@ -221,6 +221,9 @@ class Weapon(Item):
             else:
                 self._available_ammo = self._magazine_capacity
 
+    def stop_reload(self) -> None:
+        self._is_reloading = False
+
     def can_fire(self) -> bool:
         """Проверяет, можно ли сделать выстрел (не в перезарядке)."""
         return not self._is_reloading

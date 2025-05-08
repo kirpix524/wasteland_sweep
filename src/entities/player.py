@@ -97,10 +97,11 @@ class Player(Character):
         – снимает предыдущую экипировку
         """
         if weapon not in self._inventory:
-            raise ValueError("Оружие должно находиться в инвентаре")
+            return
         # Снять старое оружие и его модификаторы
         if self._equipped_weapon:
             old = self._equipped_weapon
+            old.stop_reload()
             # Удаляем все модификаторы атаки, связанные со старым оружием
             for mod in list(self._attack_modifiers):
                 if mod.source is old:
@@ -138,6 +139,23 @@ class Player(Character):
     def reload_weapon(self) -> None:
         if self._equipped_weapon is not None:
             self._equipped_weapon.start_reload(None)
+
+    def cycle_weapon(self, direction: int) -> None:
+        """
+        Переключить экипированное оружие на следующее/предыдущее в инвентаре.
+
+        :param direction: +1 — следующее, -1 — предыдущее.
+        """
+        weapons: List[Weapon] = [item for item in self._inventory if isinstance(item, Weapon)]
+        if not weapons:
+            return
+        if self._equipped_weapon not in weapons:  # ничего не экипировано
+            self.equip_weapon(weapons[0])
+            return
+        index: int = weapons.index(self._equipped_weapon)
+        new_index: int = (index + direction) % len(weapons)
+        if weapons[new_index] is not self._equipped_weapon:
+            self.equip_weapon(weapons[new_index])
 
     def update(self, delta_time: float) -> None:
         """
@@ -259,6 +277,11 @@ class PlayerController:
         """Переключает режим стрельбы активного оружия."""
         if self._player.equipped_weapon is not None:
             self._player.equipped_weapon.cycle_fire_mode()
+
+    def cycle_weapon(self, direction: int) -> None:
+        """Переключает оружие игрока (+1 — вперёд, -1 — назад)."""
+        print(f"cycle_weapon {direction}")
+        self._player.cycle_weapon(direction)
 
     def shoot(self, target: pygame.Vector2) -> None:
         """

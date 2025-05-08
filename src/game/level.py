@@ -12,6 +12,7 @@ from src.game.entity_factory import EntityFactory
 from src.game.entity_manager import EntityManager
 from src.settings import (PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT,
                           AK_IMAGE, AK_WIDTH, AK_HEIGHT,
+                          MINIGUN_IMAGE, MINIGUN_WIDTH, MINIGUN_HEIGHT,
                           DEAD_TANK_IMAGE, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT,
                           ZOMBIE_1_ALIVE_IMAGE, ZOMBIE_1_DEAD_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
 from src.utils.level_file_manager import LevelFileManager
@@ -182,6 +183,27 @@ class Level:
                       [FireMode.SINGLE, FireMode.AUTO],
                       10,
                       RectangleShape(600, 300, AK_WIDTH, AK_HEIGHT))
+        level.entity_manager.add_existing_entity(ak47)
+
+        minigun_picture = level.get_picture(MINIGUN_IMAGE, int(MINIGUN_WIDTH*1.2), int(MINIGUN_HEIGHT*1.2))
+        minigun = Weapon(level.entity_manager,
+                         0,
+                         600,
+                         500,
+                         "minigun",
+                         "big fucking gun",
+                         5000,
+                         4000,
+                         250,
+                         8,
+                         700,
+                         400,
+                         500,
+                         minigun_picture,
+                         [FireMode.AUTO],
+                         30,
+                         RectangleShape(600, 500, MINIGUN_WIDTH, MINIGUN_HEIGHT))
+        level.entity_manager.add_existing_entity(minigun)
 
         tank_picture = level.get_picture(DEAD_TANK_IMAGE, int(DEAD_TANK_WIDTH*1.2), int(DEAD_TANK_HEIGHT*1.2))
         tank = MapEntity(level.entity_manager,
@@ -217,7 +239,7 @@ class Level:
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)
         level._player_controller = player_controller
-        level.entity_manager.add_existing_entity(ak47)
+
         return level
 
     def save_to_file(self, path: str) -> None:

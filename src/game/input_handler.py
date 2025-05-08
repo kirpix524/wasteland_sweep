@@ -49,5 +49,10 @@ class PlayStateInputHandler:
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:  # левая кнопка
                 controller.mouse_button_up()
+        elif event.type == pygame.MOUSEWHEEL:  # поддержка pygame-2
+            if event.y > 0:
+                controller.cycle_weapon(1)
+            elif event.y < 0:
+                controller.cycle_weapon(-1)
         elif event.type == pygame.MOUSEMOTION:
             controller.update_aim(pygame.Vector2(event.pos))

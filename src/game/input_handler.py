@@ -36,6 +36,8 @@ class PlayStateInputHandler:
                 controller.start_move_down()
             elif event.key == pygame.K_r:
                 controller.reload()
+            elif event.key == pygame.K_y:  # переключаем режим огня
+                controller.cycle_fire_mode()
         elif event.type == pygame.KEYUP:
             if event.key in (pygame.K_a, pygame.K_d):
                 controller.stop_move_horizontal()
@@ -43,6 +45,9 @@ class PlayStateInputHandler:
                 controller.stop_move_vertical()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # левая кнопка
-                controller.shoot(pygame.Vector2(event.pos))
+                controller.mouse_button_down(pygame.Vector2(event.pos))
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:  # левая кнопка
+                controller.mouse_button_up()
         elif event.type == pygame.MOUSEMOTION:
             controller.update_aim(pygame.Vector2(event.pos))

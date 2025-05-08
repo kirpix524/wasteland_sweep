@@ -8,7 +8,7 @@ from src.entities.item import Item
 from src.entities.entity import Shape
 from src.entities.projectile import Projectile
 from src.game.animation import Animation
-from src.entities.weapon import Weapon
+from src.entities.weapon import Weapon, FireMode
 from src.game.entity_manager import EntityManager
 
 
@@ -175,6 +175,8 @@ class PlayerController:
         self._move_x: int = 0
         self._move_y: int = 0
         self._aim_direction: pygame.Vector2 = pygame.Vector2()
+        self._is_auto_firing: bool = False
+        self._auto_fire_timer: float = 0.0
 
     @property
     def player(self) -> 'Player':
@@ -227,6 +229,36 @@ class PlayerController:
     def stop_move_vertical(self) -> None:
         self._move_y = 0
         self._update_velocity()
+
+    def mouse_button_down(self, mouse_pos: pygame.Vector2) -> None:
+        """Обрабатывает нажатие ЛКМ с учётом режима огня."""
+        self.update_aim(mouse_pos)
+        if self.player.equipped_weapon.current_fire_mode == FireMode.AUTO:
+            self._is_auto_firing = True
+            self._auto_fire_timer = 0.0
+            self._try_fire()
+        else:
+            self.shoot(mouse_pos)
+
+    def mouse_button_up(self) -> None:
+        self._is_auto_firing = False
+
+    def _try_fire(self) -> None:
+        """Пытается произвести выстрел текущим оружием."""
+        if self._player.equipped_weapon:
+            self._player.equipped_weapon.fire((self.position.x, self.position.y), self._aim_direction)
+
+    def update(self, delta_time: float) -> None:
+        if self._is_auto_firing and self._player.equipped_weapon.current_fire_mode == FireMode.AUTO:
+            self._auto_fire_timer += delta_time
+            if self._auto_fire_timer >= 1 / self._player.equipped_weapon.firing_rate:
+                self._auto_fire_timer = 0.0
+                self._try_fire()
+
+    def cycle_fire_mode(self) -> None:
+        """Переключает режим стрельбы активного оружия."""
+        if self._player.equipped_weapon is not None:
+            self._player.equipped_weapon.cycle_fire_mode()
 
     def shoot(self, target: pygame.Vector2) -> None:
         """

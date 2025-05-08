@@ -7,7 +7,7 @@ from src.entities.item import Item
 from src.entities.map_entity import MapEntity
 from src.entities.npc import NPC, Attitude, ZombieDecisionModule
 from src.entities.player import PlayerController, Player
-from src.entities.weapon import Weapon
+from src.entities.weapon import Weapon, FireMode
 from src.game.entity_factory import EntityFactory
 from src.game.entity_manager import EntityManager
 from src.settings import (PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT,
@@ -179,6 +179,8 @@ class Level:
                       300,
                       30,
                       ak_picture,
+                      [FireMode.SINGLE, FireMode.AUTO],
+                      10,
                       RectangleShape(600, 300, AK_WIDTH, AK_HEIGHT))
 
         tank_picture = level.get_picture(DEAD_TANK_IMAGE, int(DEAD_TANK_WIDTH*1.2), int(DEAD_TANK_HEIGHT*1.2))

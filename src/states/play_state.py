@@ -26,7 +26,9 @@ class PlayState(BaseState):
 
     def update(self, dt: float) -> None:
         super().update(dt)
+        self._game_session.current_level.player_controller.update(dt)
         self._game_session.current_level.update(dt)
+
 
     def show_text(self, surface: 'pygame.Surface', text: str, font_size: int, x: int, y: int, color: tuple) -> None:
         font = pygame.font.Font(None, font_size)
@@ -34,33 +36,30 @@ class PlayState(BaseState):
         text_rect = text_surf.get_rect(topright=(x, y))
         surface.blit(text_surf, text_rect)
 
-    def render(self, surface: 'pygame.Surface') -> None:
+    def show_info(self, surface: 'pygame.Surface') -> None:
         from src.settings import SCREEN_WIDTH
-        super().render(surface)
         player = self._game_session.current_level.player_controller.player
         weapon = player.equipped_weapon
         current_ammo = weapon.current_ammo if weapon else 0
         weapon_name = weapon.name if weapon else "Отсутствует"
+        fire_mode = weapon.current_fire_mode if weapon else ""
         self._game_session.current_level.render(surface)
         entity_manager = self._game_session.current_level.entity_manager
         objects = len(entity_manager.all_entities)
 
         # Отображение названия оружия и оставшихся патронов в верхнем правом углу
-        font = pygame.font.Font(None, 34)
-        weapon_text = f"Оружие: {weapon_name}"
+        weapon_text = f"Оружие: {weapon_name} "
+        fire_mode_text = f"Режим огня: {fire_mode}"
         ammo_text = f"Патроны: {current_ammo}"
         obj_text = f"Объектов: {objects}"
+
         black_color = (0, 0, 0)
         self.show_text(surface, weapon_text, 34, SCREEN_WIDTH - 10, 10, black_color)
         self.show_text(surface, ammo_text, 34, SCREEN_WIDTH - 10, 40, black_color)
-        self.show_text(surface, obj_text, 34, SCREEN_WIDTH - 10, 70, black_color)
+        self.show_text(surface, fire_mode_text, 34, SCREEN_WIDTH - 10, 70, black_color)
+        self.show_text(surface, obj_text, 34, SCREEN_WIDTH - 10, 100, black_color)
 
+    def render(self, surface: 'pygame.Surface') -> None:
+        super().render(surface)
+        self.show_info(surface)
 
-
-        # weapon_text_surf = font.render(weapon_text, True, (0, 0, 0))
-        # ammo_text_surf = font.render(ammo_text, True, (0, 0, 0))
-        #
-        # weapon_text_rect = weapon_text_surf.get_rect(topright=(SCREEN_WIDTH - 10, 10))
-        # surface.blit(weapon_text_surf, weapon_text_rect)
-        # ammo_text_rect = ammo_text_surf.get_rect(topright=(SCREEN_WIDTH - 10, 40))
-        # surface.blit(ammo_text_surf, ammo_text_rect)

@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from enum import Enum, auto
 from typing import Any, Optional, List, TYPE_CHECKING, Tuple
 
 import pygame
@@ -13,6 +14,10 @@ if TYPE_CHECKING:
     from src.entities.modifier import Modifier
     from src.entities.projectile import Projectile
 
+class FireMode(Enum):
+    SINGLE: int = auto()   # одиночный
+    AUTO: int = auto()     # автоматический
+    BURST: int = auto()    # очередь
 
 class Weapon(Item):
     """
@@ -39,6 +44,8 @@ class Weapon(Item):
         shot_vision_range: float,
         magazine_capacity: int,
         picture: Optional[Any] = None,
+        available_fire_modes: Optional[List[FireMode]] = None,
+        firing_rate: Optional[int] = None,
         shape: Optional['Shape'] = None
     ) -> None:
         super().__init__(
@@ -55,11 +62,20 @@ class Weapon(Item):
         )
         # Базовые значения
         self._firing_range: float        = firing_range
+        self._firing_rate: int           = firing_rate
         self._bullet_speed: float        = bullet_speed
         self._attack_power: float        = attack_power
         self._reload_time: float         = reload_time
         self._shot_hearing_range: float  = shot_hearing_range
         self._shot_vision_range: float   = shot_vision_range
+
+        # Доступные режимы стрельбы
+        if available_fire_modes is None:
+            self._available_fire_modes: List[FireMode] = [FireMode.SINGLE]
+        else:
+            self._available_fire_modes: List[FireMode] = available_fire_modes
+
+        self._current_fire_mode: FireMode = self._available_fire_modes[0]
 
         # Вместимость магазина и оставшиеся выстрелы
         self._magazine_capacity: int = magazine_capacity
@@ -150,6 +166,36 @@ class Weapon(Item):
     @owner.setter
     def owner(self, value):
         self._owner = value
+
+    @property
+    def current_fire_mode(self) -> FireMode:
+        """Текущий выбранный режим стрельбы."""
+        return self._current_fire_mode
+
+    @property
+    def available_fire_modes(self) -> Tuple[FireMode, ...]:
+        """Все режимы стрельбы, поддерживаемые конкретным образцом оружия."""
+        return tuple(self._available_fire_modes)
+
+    @property
+    def firing_rate(self) -> int:
+        return self._firing_rate
+
+    def set_fire_mode(self, mode: FireMode) -> None:
+        """
+        Установить режим стрельбы, если он доступен у данного оружия.
+
+        :raises ValueError: если режим не поддерживается.
+        """
+        if mode in self._available_fire_modes:
+            self._current_fire_mode = mode
+
+    def cycle_fire_mode(self) -> None:
+        """Переключить режим стрельбы по кругу (Single → Auto → Burst → ...)."""
+        index: int = self._available_fire_modes.index(self._current_fire_mode)
+        next_index: int = (index + 1) % len(self._available_fire_modes)
+        self._current_fire_mode = self._available_fire_modes[next_index]
+
 
     def reload_magazine(self) -> None:
         """Перезарядить магазин до полной вместимости."""

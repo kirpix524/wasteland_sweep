@@ -22,7 +22,7 @@ class PlayState(BaseState):
 
     def handle_event(self, event: Any) -> None:
         super().handle_event(event)
-        PlayStateInputHandler.handle(event, self._game_session.current_level.player_controller)
+        PlayStateInputHandler.handle(event, self)
 
     def update(self, dt: float) -> None:
         super().update(dt)

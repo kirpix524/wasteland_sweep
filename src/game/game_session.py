@@ -28,6 +28,10 @@ class GameSession:
         # чистим/инициализируем сущности (игрока, врагов, мусор и пр.)
         return self._current_level
 
+    def save(self):
+        # сохраняем текущую сессию
+        pass
+
     def _initialize_entities(self):
         # создаём Player, врагов, объекты уровня и т.п.
         # сбрасываем здоровье, позиции и т.д.

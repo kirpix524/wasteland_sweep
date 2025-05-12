@@ -7,7 +7,7 @@ from src.game.state_manager import StateManager
 from src.settings import SCREEN_WIDTH, SCREEN_HEIGHT, MENU_BG_IMAGE
 
 class MainMenuState(BaseState):
-    OPTIONS = ["New Game", "Load Game", "Exit"]
+    OPTIONS = ["Новая игра", "Загрузить игру", "Выйти"]
 
     def __init__(self, manager: StateManager):
         super().__init__(manager)
@@ -22,11 +22,11 @@ class MainMenuState(BaseState):
 
     def get_selected(self):
         choice = self.OPTIONS[self.__selected]
-        if choice == "New Game":
+        if choice == "Новая игра":
             self.manager.game_session.start_level(1)
             message = self.manager.game_session.current_level.briefing_message
             self.manager.change_state("briefing", message=message)  # или конкретный PlayState
-        elif choice == "Load Game":
+        elif choice == "Загрузить игру":
             self.manager.change_state("load")  # State для загрузки
         else:
             self.manager.quit = True

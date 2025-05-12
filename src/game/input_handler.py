@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from src.entities.player import PlayerController
     from src.states.main_menu_state import MainMenuState
     from src.states.pause_state import PauseState
+    from src.states.lose_state import LoseState
 
 
 class MainMenuStateInputHandler:
@@ -67,6 +68,17 @@ class PlayStateInputHandler:
 class PauseStateInputHandler:
     @staticmethod
     def handle(event: pygame.event.Event, state: 'PauseState') -> None:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                state.change_selected(1)
+            elif event.key == pygame.K_UP:
+                state.change_selected(-1)
+            elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                state.get_selected()
+
+class LoseStateInputHandler:
+    @staticmethod
+    def handle(event: pygame.event.Event, state: 'LoseState') -> None:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
                 state.change_selected(1)

@@ -33,7 +33,7 @@ class LevelManager:
             raise ValueError(f"Level number {level_number} out of range")
         self._current_index = level_number - 1
         path: str = self._level_paths[self._current_index]
-        self._current_level = Level.load_from_file(path, entity_factory)
+        self._current_level = Level.load_from_file(path, level_number, entity_factory)
         return self._current_level
 
     def has_next_level(self) -> bool:

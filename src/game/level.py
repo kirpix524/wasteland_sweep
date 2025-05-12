@@ -33,6 +33,7 @@ class Level:
     def __init__(
         self,
         level_id: str,
+        level_num: int,
         name: str,
         briefing_message: str,
         level_complete_message: str,
@@ -43,6 +44,7 @@ class Level:
     ) -> None:
         # Идентификатор уровня (только для чтения)
         self._id: str = level_id
+        self._level_num: int = level_num
         # Название уровня
         self._name: str = name
         self._briefing_message: str = briefing_message
@@ -82,6 +84,10 @@ class Level:
     @property
     def id(self) -> str:
         return self._id
+
+    @property
+    def level_num(self) -> int:
+        return self._level_num
 
     @property
     def name(self) -> str:
@@ -165,10 +171,10 @@ class Level:
         return picture
 
     @classmethod
-    def load_from_file(cls, path: str, entity_factory: EntityFactory) -> 'Level':
+    def load_from_file(cls, path: str, level_num: int, entity_factory: EntityFactory) -> 'Level':
         """Загрузить уровень из JSON/YAML-файла."""
         # Реализация загрузчика (Parser + фабрики сущностей)
-        level_id="level_1"
+        level_id="level_"+str(level_num)
         level_name="Test level"
         briefing_message="Убей всех врагов"
         level_complete_message="Уровень пройден"
@@ -176,6 +182,7 @@ class Level:
         level_bg=pygame.image.load(level_bg_path).convert()
         level_bg = pygame.transform.scale(level_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
         level = Level(level_id=level_id,
+                      level_num=level_num,
                       name=level_name,
                       briefing_message=briefing_message,
                       level_complete_message=level_complete_message,

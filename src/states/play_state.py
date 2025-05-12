@@ -26,8 +26,14 @@ class PlayState(BaseState):
 
     def update(self, dt: float) -> None:
         super().update(dt)
+        if self._game_session.current_level.player_controller.player.health <= 0:
+            self.manager.change_state("lose")
+            return
         self._game_session.current_level.player_controller.update(dt)
         self._game_session.current_level.update(dt)
+        if self._game_session.current_level.is_completed:
+            self.manager.change_state("win", message=self._game_session.current_level.level_complete_message)
+            return
 
 
     def show_text(self, surface: 'pygame.Surface', text: str, font_size: int, x: int, y: int, color: tuple) -> None:

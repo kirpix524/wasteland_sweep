@@ -1,0 +1,158 @@
+{
+  "id": "level_1",
+  "name": "Test level",
+  "briefing_message": "Убей всех врагов",
+  "background": "levels/level_1_bg.png",
+  "music": null,
+  "player": {
+    "type": "Player",
+    "params": {
+      "id": 0,
+      "max_health": 1000,
+      "x": 300,
+      "y": 300,
+      "velocity_x": 300,
+      "velocity_y": 150,
+      "width": 10,
+      "height": 10,
+      "vision_radius": 300,
+      "rotation": 0,
+      "picture": "PLAYER_IMAGE",
+      "shape": {
+        "type": "CircleShape",
+        "params": [300, 300, 25]
+      }
+    }
+  },
+  "entities": [
+    {
+      "type": "Weapon",
+      "params": {
+        "id": 0,
+        "ammo": 1200,
+        "damage": 300,
+        "name": "ak-47",
+        "description": "ak-47 rifle",
+        "reload_time": 2000,
+        "fire_rate": 800,
+        "min_spread": 150,
+        "max_ammo": 3,
+        "range": 500,
+        "accuracy": 300,
+        "magazine_size": 30,
+        "picture": "AK_IMAGE",
+        "width": "AK_WIDTH",
+        "height": "AK_HEIGHT",
+        "fire_modes": ["SINGLE", "AUTO"],
+        "fire_sound": "AK_SOUND",
+        "shape": {
+          "type": "RectangleShape",
+          "params": [600, 300, "AK_WIDTH", "AK_HEIGHT"]
+        }
+      }
+    },
+    {
+      "type": "Weapon",
+      "params": {
+        "id": 0,
+        "ammo": 1200,
+        "damage": 500,
+        "name": "minigun",
+        "description": "big fucking gun",
+        "reload_time": 3000,
+        "fire_rate": 1000,
+        "min_spread": 250,
+        "max_ammo": 8,
+        "range": 700,
+        "accuracy": 400,
+        "magazine_size": 500,
+        "picture": "MINIGUN_IMAGE",
+        "width": "MINIGUN_WIDTH",
+        "height": "MINIGUN_HEIGHT",
+        "fire_modes": ["AUTO"],
+        "fire_sound": "MINIGUN_SOUND",
+        "shape": {
+          "type": "RectangleShape",
+          "params": [200, 800, "MINIGUN_WIDTH", "MINIGUN_HEIGHT"]
+        }
+      }
+    },
+    {
+      "type": "NPC_GROUP",
+      "params": {
+        "type": "zombie",
+        "count_x": 5,
+        "count_y": 5,
+        "start_x": 100,
+        "start_y": 600,
+        "step_x": 100,
+        "step_y": 100,
+        "max_health": 1000,
+        "velocity_x": 1000,
+        "velocity_y": 1000,
+        "width": 20,
+        "height": 20,
+        "vision_radius": 50,
+        "respawn_time": 3000,
+        "attitude": "HOSTILE",
+        "decision_module": "ZombieDecisionModule",
+        "picture_alive": "ZOMBIE_1_ALIVE_IMAGE",
+        "picture_dead": "ZOMBIE_1_DEAD_IMAGE",
+        "shape": {
+          "type": "CircleShape",
+          "params": [200, 800, 25]
+        }
+      }
+    },
+    {
+      "type": "NPC_GROUP",
+      "params": {
+        "type": "zombie dog",
+        "count": 5,
+        "start_x": 100,
+        "start_y": 300,
+        "step_x": 100,
+        "max_health": 500,
+        "velocity_x": 500,
+        "velocity_y": 500,
+        "width": 120,
+        "height": 25,
+        "vision_radius": 30,
+        "respawn_time": 3000,
+        "attitude": "HOSTILE",
+        "decision_module": "ZombieDecisionModule",
+        "picture_alive": "ZOMBIE_DOG_1_ALIVE_IMAGE",
+        "picture_dead": "ZOMBIE_DOG_1_DEAD_IMAGE",
+        "shape": {
+          "type": "RectangleShape",
+          "params": [200, 800, 30, 45]
+        }
+      }
+    },
+    {
+      "type": "NPC_GROUP",
+      "params": {
+        "type": "robot",
+        "count": 5,
+        "start_x": 900,
+        "start_y": 1100,
+        "step_x": 100,
+        "max_health": 5000,
+        "velocity_x": 5000,
+        "velocity_y": 5000,
+        "width": 100,
+        "height": 60,
+        "vision_radius": 90,
+        "respawn_time": 3000,
+        "attitude": "HOSTILE",
+        "decision_module": "ZombieDecisionModule",
+        "picture_alive": "ROBOT_1_ALIVE_IMAGE",
+        "picture_dead": "ROBOT_1_DEAD_IMAGE",
+        "shape": {
+          "type": "CircleShape",
+          "params": [200, 800, 30]
+        }
+      }
+    }
+  ]
+}

@@ -35,6 +35,7 @@ class Level:
         level_id: str,
         name: str,
         briefing_message: str,
+        level_complete_message: str,
         entity_factory: EntityFactory,
         player_controller: Optional[PlayerController] = None,
         background: Optional[Any] = None,
@@ -45,16 +46,26 @@ class Level:
         # Название уровня
         self._name: str = name
         self._briefing_message: str = briefing_message
+        self._level_complete_message: str = level_complete_message
         # Фоновые настройки: изображение, анимация
         self._background: Optional[Any] = background
         # Фоновая музыка для уровня
         self._music: Optional[str] = music
         self._entity_manager: EntityManager = EntityManager(entity_factory)
         self._player_controller: Optional[PlayerController] = player_controller
+        self._is_completed: bool = False
+
+    @property
+    def is_completed(self) -> bool:
+        return self._is_completed
 
     @property
     def briefing_message(self) -> str:
         return self._briefing_message
+
+    @property
+    def level_complete_message(self) -> str:
+        return self._level_complete_message
 
     @property
     def entity_manager(self) -> EntityManager:
@@ -108,8 +119,13 @@ class Level:
 
     def update(self, delta_time: float) -> None:
         """Обновить все сущности и триггеры на уровне."""
+        is_completed = True
         for e in list(self.entities):
             e.update(delta_time)
+            if isinstance(e, NPC):
+                if (e.attitude==Attitude.HOSTILE) and e.is_alive:
+                    is_completed = False
+        self._is_completed = is_completed
         self._check_item_pickup()
 
     def _check_item_pickup(self) -> None:
@@ -155,13 +171,15 @@ class Level:
         level_id="level_1"
         level_name="Test level"
         briefing_message="Убей всех врагов"
+        level_complete_message="Уровень пройден"
         level_bg_path = LevelFileManager.get_level_bg_path(1)
         level_bg=pygame.image.load(level_bg_path).convert()
         level_bg = pygame.transform.scale(level_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
-        level = Level(level_id,
-                      level_name,
-                      briefing_message,
-                      entity_factory,
+        level = Level(level_id=level_id,
+                      name=level_name,
+                      briefing_message=briefing_message,
+                      level_complete_message=level_complete_message,
+                      entity_factory=entity_factory,
                       background=level_bg)
         player_image = level.get_picture(PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT)
         player = Player(level.entity_manager,

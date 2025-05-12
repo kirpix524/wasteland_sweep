@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.states.play_state import PlayState
-    from src.entities.player import PlayerController
     from src.states.main_menu_state import MainMenuState
     from src.states.pause_state import PauseState
     from src.states.lose_state import LoseState

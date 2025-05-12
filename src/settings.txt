@@ -1,9 +1,11 @@
 # Screen dimensions
-SCREEN_WIDTH = 2400
-SCREEN_HEIGHT = 1400
+SCREEN_WIDTH = 2000
+SCREEN_HEIGHT = 1200
 PLAYER_WIDTH = 96
 PLAYER_HEIGHT = 69
 PLAYER_IMAGE = resources/images/graphic-assault-type-cs-unit.png
+CROSSHAIR_IMAGE = resources/images/crosshair_blue.png
+CROSSHAIR_SIZE = 35
 AK_WIDTH = 60
 AK_HEIGHT = 45
 AK_IMAGE = resources/images/ak.png

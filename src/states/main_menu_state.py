@@ -7,7 +7,8 @@ from src.game.state_manager import StateManager
 from src.settings import SCREEN_WIDTH, SCREEN_HEIGHT, MENU_BG_IMAGE
 
 class MainMenuState(BaseState):
-    OPTIONS = ["Новая игра", "Загрузить игру", "Выйти"]
+    #OPTIONS = ["Новая игра", "Загрузить игру", "Выйти"]
+    OPTIONS = ["Новая игра", "Выйти"]
 
     def __init__(self, manager: StateManager):
         super().__init__(manager)

@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     PLAYER_HEIGHT: int
     MENU_BG_IMAGE: str
     BRIEFING_BG_IMAGE: str
+    CROSSHAIR_IMAGE: str
+    CROSSHAIR_SIZE: int
     PLAYER_IMAGE: str
     AK_IMAGE: str
     AK_SOUND: str

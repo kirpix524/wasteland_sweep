@@ -3,6 +3,7 @@ from itertools import count
 import pygame
 from typing import TYPE_CHECKING, Any
 
+from src.settings import CROSSHAIR_IMAGE, CROSSHAIR_SIZE
 from src.states.base_state import BaseState
 from src.game.input_handler import PlayStateInputHandler
 
@@ -13,8 +14,11 @@ if TYPE_CHECKING:
 class PlayState(BaseState):
     def __init__(self, state_manager: 'StateManager', game_session: 'GameSession') -> None:
         super().__init__(state_manager)
+        pygame.mouse.set_visible(False)
         self._game_session = game_session
         self._state_manager = state_manager
+        self.__crosshair: pygame.Surface = pygame.image.load(CROSSHAIR_IMAGE).convert_alpha()
+        self.__crosshair = pygame.transform.scale(self.__crosshair, (CROSSHAIR_SIZE, CROSSHAIR_SIZE))
 
     @property
     def game_session(self) -> 'GameSession':
@@ -70,4 +74,7 @@ class PlayState(BaseState):
         super().render(surface)
         self._game_session.current_level.render(surface)
         self.show_info(surface)
+        mx, my = pygame.mouse.get_pos()
+        rect = self.__crosshair.get_rect(center=(mx, my))
+        surface.blit(self.__crosshair, rect.topleft)
 

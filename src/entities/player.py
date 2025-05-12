@@ -34,7 +34,6 @@ class Player(Character):
         animation: Optional[Animation] = None,
         shape: Optional[Shape] = None
     ) -> None:
-        print(f"01 picture: {picture}")
         super().__init__(
             entity_manager, entity_id, x, y,
             health, max_health,
@@ -42,7 +41,6 @@ class Player(Character):
             vision_range,
             angle, False, True,picture, animation, shape
         )
-        print(f"02 picture: {self.picture}")
         # Инвентарь игрока
         self._inventory: List[Item] = []
         # Экипированное оружие и броня

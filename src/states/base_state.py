@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+import pygame
+
 if TYPE_CHECKING:
     from src.game.state_manager import StateManager
 
@@ -7,6 +9,7 @@ if TYPE_CHECKING:
 class BaseState:
     def __init__(self, manager: 'StateManager', **kwargs):
         self.manager:'StateManager' = manager
+        pygame.mouse.set_visible(True)
 
 
     def handle_event(self, event):

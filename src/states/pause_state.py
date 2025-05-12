@@ -6,13 +6,11 @@ from src.settings import MENU_BG_IMAGE, SCREEN_WIDTH, SCREEN_HEIGHT
 from src.game.input_handler import PauseStateInputHandler
 
 if TYPE_CHECKING:
-
     from src.game.state_manager import StateManager
 
-
-
 class PauseState(BaseState):
-    OPTIONS = ["Вернуться в игру", "Сохранить игру", "Выйти в главное меню"]
+    #OPTIONS = ["Вернуться в игру", "Сохранить игру", "Выйти в главное меню"]
+    OPTIONS = ["Вернуться в игру", "Выйти в главное меню"]
 
     def __init__(self, manager: 'StateManager') -> None:
         super().__init__(manager)
@@ -54,3 +52,5 @@ class PauseState(BaseState):
             x = surface.get_width() // 2 - label.get_width() // 2
             y = surface.get_height() // 2 + i * 60
             surface.blit(label, (x, y))
+
+

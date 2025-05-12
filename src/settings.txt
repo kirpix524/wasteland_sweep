@@ -1,6 +1,6 @@
 # Screen dimensions
-SCREEN_WIDTH = 2000
-SCREEN_HEIGHT = 1200
+SCREEN_WIDTH = 1600
+SCREEN_HEIGHT = 1000
 PLAYER_WIDTH = 96
 PLAYER_HEIGHT = 69
 PLAYER_IMAGE = resources/images/graphic-assault-type-cs-unit.png

@@ -29,7 +29,6 @@ class Player(Character):
         attack: float,
         defense: float,
         vision_range: float,
-        hearing_range: float,
         angle: float = 0.0,
         picture: Optional[Any] = None,
         animation: Optional[Animation] = None,
@@ -40,7 +39,7 @@ class Player(Character):
             entity_manager, entity_id, x, y,
             health, max_health,
             speed, attack, defense,
-            vision_range, hearing_range,
+            vision_range,
             angle, False, True,picture, animation, shape
         )
         print(f"02 picture: {self.picture}")

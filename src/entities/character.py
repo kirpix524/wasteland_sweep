@@ -29,7 +29,6 @@ class Character(Entity, ABC):
         attack: float,
         defense: float,
         vision_range: float,
-        hearing_range: float,
         angle: float = 0.0,
         collectable: bool = False,
         can_collect: bool = False,
@@ -50,7 +49,6 @@ class Character(Entity, ABC):
         self._defense: float = defense
         self._velocity: pygame.Vector2 = pygame.Vector2(0.0, 0.0)
         self._vision_range: float = vision_range
-        self._hearing_range: float = hearing_range
         self._can_collect: bool = can_collect
         self._is_alive: bool = True
         self._vision_angle: float = vision_angle
@@ -94,10 +92,6 @@ class Character(Entity, ABC):
     @property
     def vision_range(self) -> float:
         return self._vision_range + sum(m.value for m in self._vision_modifiers)
-
-    @property
-    def hearing_range(self) -> float:
-        return self._hearing_range + sum(m.value for m in self._hearing_modifiers)
 
     @property
     def can_collect(self) -> bool:

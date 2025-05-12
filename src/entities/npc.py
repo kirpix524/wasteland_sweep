@@ -97,7 +97,6 @@ class NPC(Character):
         attack: float,
         defense: float,
         vision_range: float,
-        hearing_range: float,
         name: str,
         attitude: Attitude,
         decision_module: DecisionModule,
@@ -119,7 +118,6 @@ class NPC(Character):
             attack=attack,
             defense=defense,
             vision_range=vision_range,
-            hearing_range=hearing_range,
             angle=angle,
             collectable=False,
             picture=picture_alive,
@@ -233,11 +231,10 @@ class NPC(Character):
         учитывая препятствия (is_solid) между NPC и целью.
         """
         visible: List['Entity'] = []
-        audible: List['Entity'] = []
 
         entities: List['Entity'] = self._entity_manager.all_entities
         if not entities:
-            return {'visible': visible, 'audible': audible}
+            return {'visible': visible}
 
         sx, sy = self.position
 
@@ -275,7 +272,7 @@ class NPC(Character):
             # if dist <= self.hearing_range:
             #     audible.append(entity)
 
-        return {'visible': visible, 'audible': audible}
+        return {'visible': visible}
 
     def update(self, delta_time: float) -> None:
         """

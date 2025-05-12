@@ -2,6 +2,7 @@ from typing import List, Tuple, Optional, Any
 
 import pygame
 
+from src.entities.character import Character
 from src.entities.entity import Entity, CircleShape, RectangleShape
 from src.entities.item import Item
 from src.entities.map_entity import MapEntity
@@ -14,7 +15,11 @@ from src.settings import (PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT,
                           AK_IMAGE, AK_WIDTH, AK_HEIGHT, AK_SOUND,
                           MINIGUN_IMAGE, MINIGUN_WIDTH, MINIGUN_HEIGHT, MINIGUN_SOUND,
                           DEAD_TANK_IMAGE, DEAD_TANK_WIDTH, DEAD_TANK_HEIGHT,
-                          ZOMBIE_1_ALIVE_IMAGE, ZOMBIE_1_DEAD_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT)
+                          ZOMBIE_1_ALIVE_IMAGE, ZOMBIE_1_DEAD_IMAGE, ZOMBIE_1_WIDTH, ZOMBIE_1_HEIGHT, SCREEN_WIDTH,
+                          ZOMBIE_2_ALIVE_IMAGE, ZOMBIE_2_DEAD_IMAGE, ZOMBIE_2_WIDTH, ZOMBIE_2_HEIGHT,
+                          ZOMBIE_DOG_1_ALIVE_IMAGE, ZOMBIE_DOG_1_DEAD_IMAGE, ZOMBIE_DOG_1_WIDTH, ZOMBIE_DOG_1_HEIGHT,
+                          ROBOT_1_ALIVE_IMAGE, ROBOT_1_DEAD_IMAGE, ROBOT_1_WIDTH, ROBOT_1_HEIGHT,
+                          SCREEN_HEIGHT)
 from src.utils.level_file_manager import LevelFileManager
 
 
@@ -128,6 +133,14 @@ class Level:
             surface.blit(self._background, (0, 0))
         # Рисуем сущности
         for e in self.entities:
+            if isinstance(e, Character):
+                if e.is_alive:
+                    continue
+            e.render(surface)
+        for e in self.entities:
+            if isinstance(e, Character):
+                if not e.is_alive:
+                    continue
             e.render(surface)
 
     def get_picture(self, path: str, width: int, height: int) -> pygame.image:
@@ -144,6 +157,7 @@ class Level:
         briefing_message="Убей всех врагов"
         level_bg_path = LevelFileManager.get_level_bg_path(1)
         level_bg=pygame.image.load(level_bg_path).convert()
+        level_bg = pygame.transform.scale(level_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
         level = Level(level_id,
                       level_name,
                       briefing_message,
@@ -152,7 +166,7 @@ class Level:
         player_image = level.get_picture(PLAYER_IMAGE, PLAYER_WIDTH, PLAYER_HEIGHT)
         player = Player(level.entity_manager,
                         0,
-                        300,
+                        1000,
                         300,
                         300,
                         300,
@@ -160,7 +174,6 @@ class Level:
                         10,
                         10,
                         300,
-                        150,
                         0,
                         picture=player_image,
                         shape=CircleShape(300, 300, 25))
@@ -168,7 +181,7 @@ class Level:
         ak_picture = level.get_picture(AK_IMAGE, AK_WIDTH, AK_HEIGHT)
         ak47 = Weapon(level.entity_manager,
                       0,
-                      600,
+                      1200,
                       300,
                       "ak-47",
                       "ak-47 rifle",
@@ -189,7 +202,7 @@ class Level:
         minigun_picture = level.get_picture(MINIGUN_IMAGE, int(MINIGUN_WIDTH*1.2), int(MINIGUN_HEIGHT*1.2))
         minigun = Weapon(level.entity_manager,
                          0,
-                         600,
+                         1200,
                          500,
                          "minigun",
                          "big fucking gun",
@@ -232,7 +245,6 @@ class Level:
                      20,
                      50,
                      3000,
-                     800,
                      "zombie",
                      Attitude.HOSTILE,
                      ZombieDecisionModule(),
@@ -240,6 +252,50 @@ class Level:
                      picture_dead=zombie_dead_picture,
                      shape=CircleShape(200, 800, 25))
                 level.entity_manager.add_existing_entity(zombie)
+
+        zombie_dog_alive_picture = level.get_picture(ZOMBIE_DOG_1_ALIVE_IMAGE, ZOMBIE_DOG_1_WIDTH, ZOMBIE_DOG_1_HEIGHT)
+        zombie_dog_dead_picture = level.get_picture(ZOMBIE_DOG_1_DEAD_IMAGE, ZOMBIE_DOG_1_WIDTH, ZOMBIE_DOG_1_HEIGHT)
+
+        for i in range(5):
+            zombie_dog = NPC(level.entity_manager,
+                     0,
+                     100+i*100,
+                     300,
+                     500,
+                     500,
+                     120,
+                     25,
+                     30,
+                     3000,
+                     "zombie dog",
+                     Attitude.HOSTILE,
+                     ZombieDecisionModule(),
+                     picture_alive=zombie_dog_alive_picture,
+                     picture_dead=zombie_dog_dead_picture,
+                     shape=RectangleShape(200, 800, 30, 45))
+            level.entity_manager.add_existing_entity(zombie_dog)
+
+        for i in range(5):
+            robot_alive_picture = level.get_picture(ROBOT_1_ALIVE_IMAGE, ROBOT_1_WIDTH, ROBOT_1_HEIGHT)
+            robot_dead_picture = level.get_picture(ROBOT_1_DEAD_IMAGE, ROBOT_1_WIDTH, ROBOT_1_HEIGHT)
+            robot = NPC(level.entity_manager,
+                     0,
+                     900+i*100,
+                        1100,
+                        5000,
+                        5000,
+                        100,
+                        60,
+                        90,
+                        3000,
+                        "robot",
+                        Attitude.HOSTILE,
+                        ZombieDecisionModule(),
+                        picture_alive=robot_alive_picture,
+                        picture_dead=robot_dead_picture,
+                        shape=CircleShape(200, 800, 30))
+            level.entity_manager.add_existing_entity(robot)
+
         level.entity_manager.add_existing_entity(player)
         player_controller = PlayerController(player)
         level._player_controller = player_controller

@@ -1,6 +1,6 @@
 # Screen dimensions
-SCREEN_WIDTH = 1500
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 2500
+SCREEN_HEIGHT = 1400
 PLAYER_WIDTH = 96
 PLAYER_HEIGHT = 69
 PLAYER_IMAGE = resources/images/graphic-assault-type-cs-unit.png
@@ -19,6 +19,18 @@ ZOMBIE_1_WIDTH = 100
 ZOMBIE_1_HEIGHT = 100
 ZOMBIE_1_ALIVE_IMAGE = resources/images/zombie_1_alive.png
 ZOMBIE_1_DEAD_IMAGE = resources/images/zombie_1_dead.png
+ZOMBIE_2_WIDTH = 300
+ZOMBIE_2_HEIGHT = 300
+ZOMBIE_2_ALIVE_IMAGE = resources/images/zombie_2_alive.png
+ZOMBIE_2_DEAD_IMAGE = resources/images/zombie_2_dead.png
+ROBOT_1_WIDTH = 100
+ROBOT_1_HEIGHT = 100
+ROBOT_1_ALIVE_IMAGE = resources/images/robot_1_alive.png
+ROBOT_1_DEAD_IMAGE = resources/images/robot_1_dead.png
+ZOMBIE_DOG_1_WIDTH = 75
+ZOMBIE_DOG_1_HEIGHT = 50
+ZOMBIE_DOG_1_ALIVE_IMAGE = resources/images/zombie_dog_1_alive.png
+ZOMBIE_DOG_1_DEAD_IMAGE = resources/images/zombie_dog_1_dead.png
 
 
 MENU_BG_IMAGE = resources/images/main_menu_bg.png
